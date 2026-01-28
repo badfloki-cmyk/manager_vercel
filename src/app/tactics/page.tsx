@@ -410,474 +410,485 @@ export default function TacticsPage() {
                             >
                                 <Pencil className="w-5 h-5" />
                             </button>
+                            <button
+                                onClick={() => { setIsNoteMode(true); setIsDrawMode(false); }}
+                                className={cn(
+                                    "p-3 rounded-2xl transition-all",
+                                    isNoteMode ? "bg-brand text-white shadow-lg" : "text-slate-400 hover:bg-slate-50"
+                                )}
+                                title="Text hinzufügen"
+                            >
+                                <Type className="w-5 h-5" />
+                            </button>
+                        </>
                         )}
-                        <div className="w-px bg-slate-100 mx-2" />
-                        {/* Only admins clear drawings/pitch */}
-                        {isAdmin && (
-                            <>
-                                <button
-                                    onClick={() => setPaths([])}
-                                    className="p-3 rounded-2xl text-slate-400 hover:bg-slate-50 transition-all hover:text-brand"
-                                    title="Zeichnungen löschen"
-                                >
-                                    <Eraser className="w-5 h-5" />
-                                </button>
-                                <button
-                                    onClick={resetPitch}
-                                    className="p-3 rounded-2xl text-slate-400 hover:bg-slate-50 transition-all hover:text-brand"
-                                    title="Alles leeren"
-                                >
-                                    <RotateCcw className="w-5 h-5" />
-                                </button>
-                            </>
-                        )}
-                    </div>
+                    <div className="w-px bg-slate-100 mx-2" />
+                    {/* Only admins clear drawings/pitch */}
+                    {isAdmin && (
+                        <>
+                            <button
+                                onClick={() => setPaths([])}
+                                className="p-3 rounded-2xl text-slate-400 hover:bg-slate-50 transition-all hover:text-brand"
+                                title="Zeichnungen löschen"
+                            >
+                                <Eraser className="w-5 h-5" />
+                            </button>
+                            <button
+                                onClick={resetPitch}
+                                className="p-3 rounded-2xl text-slate-400 hover:bg-slate-50 transition-all hover:text-brand"
+                                title="Alles leeren"
+                            >
+                                <RotateCcw className="w-5 h-5" />
+                            </button>
+                        </>
+                    )}
+                </div>
 
-                    <div
-                        ref={constraintsRef}
-                        className={cn(
-                            "relative bg-emerald-900 rounded-[3rem] border-[16px] border-white/20 overflow-hidden shadow-2xl shadow-slate-900/20",
-                            mode === "futsal" ? "aspect-[2/3] h-full" : "aspect-[3/4] h-full"
-                        )}
-                        style={{
-                            backgroundImage: `
+                <div
+                    ref={constraintsRef}
+                    className={cn(
+                        "relative bg-emerald-900 rounded-[3rem] border-[16px] border-white/20 overflow-hidden shadow-2xl shadow-slate-900/20",
+                        mode === "futsal" ? "aspect-[2/3] h-full" : "aspect-[3/4] h-full"
+                    )}
+                    style={{
+                        backgroundImage: `
                                 linear-gradient(0deg, rgba(255,255,255,0.03) 1px, transparent 1px),
                                 linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px)
                             `,
-                            backgroundSize: '24px 24px'
-                        }}
+                        backgroundSize: '24px 24px'
+                    }}
+                >
+                    {/* Static Markings (SVG for better control) */}
+                    <svg className="absolute inset-0 w-full h-full pointer-events-none opacity-30" viewBox="0 0 100 100" preserveAspectRatio="none">
+                        <line x1="0" y1="50" x2="100" y2="50" stroke="white" strokeWidth="0.5" />
+                        <circle cx="50" cy="50" r="10" fill="none" stroke="white" strokeWidth="0.5" />
+                        <circle cx="50" cy="50" r="0.8" fill="white" />
+                        {/* Penalty boxes */}
+                        <rect x="25" y="0" width="50" height="15" fill="none" stroke="white" strokeWidth="0.5" />
+                        <rect x="25" y="85" width="50" height="15" fill="none" stroke="white" strokeWidth="0.5" />
+                    </svg>
+
+                    {/* Drawing Layer */}
+                    <svg
+                        ref={svgRef}
+                        className={cn(
+                            "absolute inset-0 w-full h-full z-20 transition-all cursor-crosshair",
+                            !isDrawMode && "pointer-events-none cursor-default"
+                        )}
+                        onMouseDown={startDrawing}
+                        onMouseMove={draw}
+                        onMouseUp={stopDrawing}
+                        onMouseLeave={stopDrawing}
+                        onTouchStart={startDrawing}
+                        onTouchMove={draw}
+                        onTouchEnd={stopDrawing}
+                        onClick={addNote}
                     >
-                        {/* Static Markings (SVG for better control) */}
-                        <svg className="absolute inset-0 w-full h-full pointer-events-none opacity-30" viewBox="0 0 100 100" preserveAspectRatio="none">
-                            <line x1="0" y1="50" x2="100" y2="50" stroke="white" strokeWidth="0.5" />
-                            <circle cx="50" cy="50" r="10" fill="none" stroke="white" strokeWidth="0.5" />
-                            <circle cx="50" cy="50" r="0.8" fill="white" />
-                            {/* Penalty boxes */}
-                            <rect x="25" y="0" width="50" height="15" fill="none" stroke="white" strokeWidth="0.5" />
-                            <rect x="25" y="85" width="50" height="15" fill="none" stroke="white" strokeWidth="0.5" />
-                        </svg>
-
-                        {/* Drawing Layer */}
-                        <svg
-                            ref={svgRef}
-                            className={cn(
-                                "absolute inset-0 w-full h-full z-20 transition-all cursor-crosshair",
-                                !isDrawMode && "pointer-events-none cursor-default"
-                            )}
-                            onMouseDown={startDrawing}
-                            onMouseMove={draw}
-                            onMouseUp={stopDrawing}
-                            onMouseLeave={stopDrawing}
-                            onTouchStart={startDrawing}
-                            onTouchMove={draw}
-                            onTouchEnd={stopDrawing}
-                            onClick={addNote}
-                        >
-                            {/* Notes Layer */}
-                            {notes.map(note => (
-                                <foreignObject
-                                    key={note.id}
-                                    x={`${note.x}%`}
-                                    y={`${note.y}%`}
-                                    width="150"
-                                    height="100"
-                                    className="overflow-visible"
-                                    style={{ transform: 'translate(-50%, -50%)' }}
-                                >
-                                    <div className="relative group">
-                                        {editingNoteId === note.id ? (
-                                            <textarea
-                                                autoFocus
-                                                value={note.text}
-                                                onChange={(e) => updateNoteText(note.id, e.target.value)}
-                                                onBlur={() => setEditingNoteId(null)}
-                                                className="w-40 bg-white/90 backdrop-blur border-2 border-brand rounded-xl p-2 text-xs font-bold shadow-xl focus:outline-none resize-none"
-                                                style={{ color: note.color === '#ffffff' ? '#000000' : note.color }}
-                                            />
-                                        ) : (
-                                            <div
-                                                onDoubleClick={(e) => {
-                                                    if (!isAdmin) return;
-                                                    e.stopPropagation();
-                                                    setEditingNoteId(note.id);
-                                                }}
-                                                className={cn(
-                                                    "px-3 py-1.5 rounded-xl text-xs font-black shadow-sm border border-white/20 backdrop-blur-sm select-none transition-all",
-                                                    isAdmin ? "cursor-grab active:cursor-grabbing hover:scale-105" : "cursor-default"
-                                                )}
-                                                style={{
-                                                    backgroundColor: note.color === '#ffffff' ? '#ffffff' : note.color,
-                                                    color: note.color === '#ffffff' ? '#000000' : '#ffffff'
-                                                }}
-                                            >
-                                                {note.text}
-                                                {isAdmin && (
-                                                    <button
-                                                        onClick={(e) => deleteNote(note.id, e)}
-                                                        className="absolute -top-2 -right-2 bg-white text-red-500 rounded-full p-0.5 shadow-md opacity-0 group-hover:opacity-100 transition-opacity"
-                                                    >
-                                                        <X className="w-3 h-3" />
-                                                    </button>
-                                                )}
-                                            </div>
-                                        )}
-                                    </div>
-                                </foreignObject>
-                            ))}
-
-                            <AnimatePresence>
-                                {paths.map(path => (
-                                    <motion.path
-                                        key={path.id}
-                                        d={`M ${path.points.map(p => `${p.x},${p.y}`).join(' L ')}`}
-                                        fill="none"
-                                        stroke={path.color}
-                                        strokeWidth={path.width}
-                                        strokeLinecap="round"
-                                        strokeLinejoin="round"
-                                        initial={{ pathLength: 0, opacity: 0 }}
-                                        animate={{ pathLength: 1, opacity: 1 }}
-                                    />
-                                ))}
-                                {currentPath && (
-                                    <path
-                                        d={`M ${currentPath.points.map(p => `${p.x},${p.y}`).join(' L ')}`}
-                                        fill="none"
-                                        stroke={currentPath.color}
-                                        strokeWidth={currentPath.width}
-                                        strokeLinecap="round"
-                                        strokeLinejoin="round"
-                                    />
-                                )}
-                            </AnimatePresence>
-                        </svg>
-
-                        {/* Players */}
-                        <AnimatePresence>
-                            {playersOnPitch.map((player) => (
-                                <motion.div
-                                    key={player.id}
-                                    drag={isAdmin && !isDrawMode}
-                                    dragConstraints={constraintsRef}
-                                    dragElastic={0}
-                                    dragMomentum={false}
-                                    initial={{ left: `${player.x}%`, top: `${player.y}%` }}
-                                    className={cn(
-                                        "absolute w-12 h-12 -ml-6 -mt-6 rounded-full border-2 border-white flex flex-col items-center justify-center shadow-xl select-none z-30 transition-transform overflow-visible group",
-                                        (isAdmin && !isDrawMode) ? "cursor-grab active:cursor-grabbing hover:scale-110" : "cursor-default",
-                                        player.color
-                                    )}
-                                    onDragEnd={(_, info) => {
-                                        const rect = constraintsRef.current!.getBoundingClientRect();
-                                        const x = ((info.point.x - rect.left) / rect.width) * 100;
-                                        const y = ((info.point.y - rect.top) / rect.height) * 100;
-                                        setPlayersOnPitch(prev => prev.map(p =>
-                                            p.id === player.id ? { ...p, x, y } : p
-                                        ));
-                                    }}
-                                >
-                                    {player.photoUrl ? (
-                                        <div className="w-full h-full rounded-full overflow-hidden relative">
-                                            <Image
-                                                src={player.photoUrl}
-                                                alt={player.name}
-                                                fill
-                                                className="object-cover"
-                                            />
-                                        </div>
+                        {/* Notes Layer */}
+                        {notes.map(note => (
+                            <foreignObject
+                                key={note.id}
+                                x={`${note.x}%`}
+                                y={`${note.y}%`}
+                                width="150"
+                                height="100"
+                                className="overflow-visible"
+                                style={{ transform: 'translate(-50%, -50%)' }}
+                            >
+                                <div className="relative group">
+                                    {editingNoteId === note.id ? (
+                                        <textarea
+                                            autoFocus
+                                            value={note.text}
+                                            onChange={(e) => updateNoteText(note.id, e.target.value)}
+                                            onBlur={() => setEditingNoteId(null)}
+                                            className="w-40 bg-white/90 backdrop-blur border-2 border-brand rounded-xl p-2 text-xs font-bold shadow-xl focus:outline-none resize-none"
+                                            style={{ color: note.color === '#ffffff' ? '#000000' : note.color }}
+                                        />
                                     ) : (
-                                        <>
-                                            <span className="text-[10px] font-black leading-none">{player.number}</span>
-                                            <span className="text-[8px] font-bold truncate max-w-[40px] leading-tight">{player.name}</span>
-                                        </>
-                                    )}
-
-                                    <div className="absolute top-14 whitespace-nowrap bg-black/60 backdrop-blur-sm px-2 py-0.5 rounded text-[8px] font-bold text-white border border-white/20">
-                                        {player.name}
-                                    </div>
-
-                                    {/* Delete indicator */}
-                                    {isAdmin && (
-                                        <button
-                                            onPointerDown={(e) => e.stopPropagation()}
-                                            onClick={(e) => {
-                                                e.preventDefault();
+                                        <div
+                                            onDoubleClick={(e) => {
+                                                if (!isAdmin) return;
                                                 e.stopPropagation();
-                                                removePlayerFromPitch(player.id);
+                                                setEditingNoteId(note.id);
                                             }}
-                                            className="absolute -top-3 -right-3 w-8 h-8 bg-brand border-2 border-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity z-[100] shadow-xl hover:scale-110 active:scale-95"
+                                            className={cn(
+                                                "px-3 py-1.5 rounded-xl text-xs font-black shadow-sm border border-white/20 backdrop-blur-sm select-none transition-all",
+                                                isAdmin ? "cursor-grab active:cursor-grabbing hover:scale-105" : "cursor-default"
+                                            )}
+                                            style={{
+                                                backgroundColor: note.color === '#ffffff' ? '#ffffff' : note.color,
+                                                color: note.color === '#ffffff' ? '#000000' : '#ffffff'
+                                            }}
                                         >
-                                            <X className="w-4 h-4 text-white" />
-                                        </button>
+                                            {note.text}
+                                            {isAdmin && (
+                                                <button
+                                                    onClick={(e) => deleteNote(note.id, e)}
+                                                    className="absolute -top-2 -right-2 bg-white text-red-500 rounded-full p-0.5 shadow-md opacity-0 group-hover:opacity-100 transition-opacity"
+                                                >
+                                                    <X className="w-3 h-3" />
+                                                </button>
+                                            )}
+                                        </div>
                                     )}
-                                </motion.div>
+                                </div>
+                            </foreignObject>
+                        ))}
+
+                        <AnimatePresence>
+                            {paths.map(path => (
+                                <motion.path
+                                    key={path.id}
+                                    d={`M ${path.points.map(p => `${p.x},${p.y}`).join(' L ')}`}
+                                    fill="none"
+                                    stroke={path.color}
+                                    strokeWidth={path.width}
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    initial={{ pathLength: 0, opacity: 0 }}
+                                    animate={{ pathLength: 1, opacity: 1 }}
+                                />
                             ))}
+                            {currentPath && (
+                                <path
+                                    d={`M ${currentPath.points.map(p => `${p.x},${p.y}`).join(' L ')}`}
+                                    fill="none"
+                                    stroke={currentPath.color}
+                                    strokeWidth={currentPath.width}
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                />
+                            )}
                         </AnimatePresence>
+                    </svg>
+
+                    {/* Players */}
+                    <AnimatePresence>
+                        {playersOnPitch.map((player) => (
+                            <motion.div
+                                key={player.id}
+                                drag={isAdmin && !isDrawMode}
+                                dragConstraints={constraintsRef}
+                                dragElastic={0}
+                                dragMomentum={false}
+                                initial={{ left: `${player.x}%`, top: `${player.y}%` }}
+                                className={cn(
+                                    "absolute w-12 h-12 -ml-6 -mt-6 rounded-full border-2 border-white flex flex-col items-center justify-center shadow-xl select-none z-30 transition-transform overflow-visible group",
+                                    (isAdmin && !isDrawMode) ? "cursor-grab active:cursor-grabbing hover:scale-110" : "cursor-default",
+                                    player.color
+                                )}
+                                onDragEnd={(_, info) => {
+                                    const rect = constraintsRef.current!.getBoundingClientRect();
+                                    const x = ((info.point.x - rect.left) / rect.width) * 100;
+                                    const y = ((info.point.y - rect.top) / rect.height) * 100;
+                                    setPlayersOnPitch(prev => prev.map(p =>
+                                        p.id === player.id ? { ...p, x, y } : p
+                                    ));
+                                }}
+                            >
+                                {player.photoUrl ? (
+                                    <div className="w-full h-full rounded-full overflow-hidden relative">
+                                        <Image
+                                            src={player.photoUrl}
+                                            alt={player.name}
+                                            fill
+                                            className="object-cover"
+                                        />
+                                    </div>
+                                ) : (
+                                    <>
+                                        <span className="text-[10px] font-black leading-none">{player.number}</span>
+                                        <span className="text-[8px] font-bold truncate max-w-[40px] leading-tight">{player.name}</span>
+                                    </>
+                                )}
+
+                                <div className="absolute top-14 whitespace-nowrap bg-black/60 backdrop-blur-sm px-2 py-0.5 rounded text-[8px] font-bold text-white border border-white/20">
+                                    {player.name}
+                                </div>
+
+                                {/* Delete indicator */}
+                                {isAdmin && (
+                                    <button
+                                        onPointerDown={(e) => e.stopPropagation()}
+                                        onClick={(e) => {
+                                            e.preventDefault();
+                                            e.stopPropagation();
+                                            removePlayerFromPitch(player.id);
+                                        }}
+                                        className="absolute -top-3 -right-3 w-8 h-8 bg-brand border-2 border-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity z-[100] shadow-xl hover:scale-110 active:scale-95"
+                                    >
+                                        <X className="w-4 h-4 text-white" />
+                                    </button>
+                                )}
+                            </motion.div>
+                        ))}
+                    </AnimatePresence>
+                </div>
+        </div>
+
+                {/* Right Sidebar: Colors & Tactic Info / List */ }
+    <aside className="w-80 border-l border-slate-100 bg-slate-50 flex flex-col hidden xl:flex">
+        {/* Tactics List for non-admins or admins who want to see it */}
+        <div className="flex-1 flex flex-col min-h-0">
+            <div className="p-6 border-b border-slate-100 flex items-center justify-between">
+                <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                    Gespeicherte Taktiken
+                </h3>
+                <button
+                    onClick={() => setShowLoadModal(true)}
+                    className="text-brand hover:text-brand-dark transition-colors"
+                >
+                    <Download className="w-4 h-4" />
+                </button>
+            </div>
+            <div className="flex-1 overflow-y-auto p-6 space-y-4 custom-scrollbar">
+                {savedTactics
+                    .filter(t => t.mode === mode)
+                    .map(t => (
+                        <div
+                            key={t._id}
+                            onClick={() => !editingTacticId && loadTactic(t)}
+                            className={cn(
+                                "group relative bg-white border border-slate-100 rounded-2xl p-4 transition-all",
+                                !editingTacticId ? "cursor-pointer hover:shadow-lg hover:shadow-brand/5 hover:border-brand/20" : ""
+                            )}
+                        >
+                            <div className="flex justify-between items-start mb-2">
+                                <span className={cn(
+                                    "px-2 py-1 rounded-md text-[8px] font-black uppercase tracking-wide",
+                                    t.mode === "futsal" ? "bg-orange-50 text-orange-500" : "bg-blue-50 text-blue-500"
+                                )}>
+                                    {t.mode === "futsal" ? "Futsal" : "11v11"}
+                                </span>
+                                {isAdmin && !editingTacticId && (
+                                    <div className="flex gap-1">
+                                        <button
+                                            onClick={(e) => startEditingTactic(t, e)}
+                                            className="p-1.5 hover:bg-slate-100 text-slate-300 hover:text-brand rounded-lg transition-colors"
+                                        >
+                                            <Pencil className="w-3.5 h-3.5" />
+                                        </button>
+                                        <button
+                                            onClick={(e) => deleteSavedTactic(t._id!, e)}
+                                            className="p-1.5 hover:bg-red-50 text-slate-300 hover:text-red-500 rounded-lg transition-colors"
+                                        >
+                                            <Trash2 className="w-3.5 h-3.5" />
+                                        </button>
+                                    </div>
+                                )}
+                            </div>
+
+                            {editingTacticId === t._id ? (
+                                <div className="mt-2 space-y-2" onClick={e => e.stopPropagation()}>
+                                    <input
+                                        type="text"
+                                        value={editName}
+                                        onChange={(e) => setEditName(e.target.value)}
+                                        className="w-full bg-slate-50 border border-slate-200 rounded-lg px-2 py-1 text-sm font-bold focus:outline-none focus:border-brand/30"
+                                        autoFocus
+                                    />
+                                    <div className="flex gap-2">
+                                        <button onClick={saveTacticName} className="px-3 py-1 bg-brand text-white text-[10px] font-bold rounded-md uppercase tracking-wide">
+                                            Speichern
+                                        </button>
+                                        <button onClick={cancelEditingTactic} className="px-3 py-1 bg-slate-100 text-slate-500 text-[10px] font-bold rounded-md uppercase tracking-wide">
+                                            Abbrechen
+                                        </button>
+                                    </div>
+                                </div>
+                            ) : (
+                                <>
+                                    <h4 className="font-bold text-slate-900 text-sm mb-1">{t.name}</h4>
+                                    <p className="text-[10px] text-slate-400 font-medium">
+                                        {new Date(t.createdAt!).toLocaleDateString('de-DE')}
+                                    </p>
+                                </>
+                            )}
+                        </div>
+                    ))}
+            </div>
+        </div>
+
+        <div className="p-8 border-t border-slate-100 bg-white">
+            {isDrawMode && isAdmin && (
+                <div className="space-y-4 mb-8">
+                    <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-1">Farbe wählen</h3>
+                    <div className="grid grid-cols-3 gap-3">
+                        {["#ef4444", "#3b82f6", "#22c55e", "#eab308", "#ffffff", "#000000"].map(c => (
+                            <button
+                                key={c}
+                                onClick={() => setDrawColor(c)}
+                                className={cn(
+                                    "w-full aspect-square rounded-xl border-4 transition-all shadow-sm",
+                                    drawColor === c ? "border-brand scale-110 shadow-lg" : "border-white"
+                                )}
+                                style={{ backgroundColor: c }}
+                            />
+                        ))}
                     </div>
                 </div>
+            )}
 
-                {/* Right Sidebar: Colors & Tactic Info / List */}
-                <aside className="w-80 border-l border-slate-100 bg-slate-50 flex flex-col hidden xl:flex">
-                    {/* Tactics List for non-admins or admins who want to see it */}
-                    <div className="flex-1 flex flex-col min-h-0">
-                        <div className="p-6 border-b border-slate-100 flex items-center justify-between">
-                            <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
-                                Gespeicherte Taktiken
-                            </h3>
+            <div className="space-y-4">
+                <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-1">Team Info</h3>
+                <div className="space-y-4 bg-white p-6 rounded-[2rem] border border-slate-100 shadow-xl shadow-slate-200/50">
+                    <div className="flex justify-between items-center">
+                        <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Auf Feld</span>
+                        <span className="text-xl font-black text-brand tracking-tight">{playersOnPitch.length}</span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                        <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Torhüter</span>
+                        <span className="text-xl font-black text-yellow-500 tracking-tight">
+                            {playersOnPitch.filter(p => p.color === "bg-yellow-500").length}
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div className="p-6 border-t border-slate-100 bg-slate-50">
+            <p className="text-[10px] text-slate-400 leading-relaxed italic font-medium">
+                {isAdmin
+                    ? "💡 Tipp: Zeichne Laufwege, speichere Formationen und verwalte Taktiken."
+                    : "💡 Info: Du kannst Taktiken ansehen und laden, aber nicht bearbeiten."}
+            </p>
+        </div>
+    </aside>
+            </main >
+
+        {/* Modals */ }
+        <AnimatePresence>
+    {
+        showSaveModal && (
+            <div className="fixed inset-0 z-[100] flex items-center justify-center p-6">
+                <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    onClick={() => setShowSaveModal(false)}
+                    className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+                />
+                <motion.div
+                    initial={{ opacity: 0, scale: 0.95, y: 20 }}
+                    animate={{ opacity: 1, scale: 1, y: 0 }}
+                    exit={{ opacity: 0, scale: 0.95, y: 20 }}
+                    className="relative w-full max-w-md bg-white border border-slate-100 rounded-[2.5rem] p-10 shadow-2xl"
+                >
+                    <div className="flex items-center justify-between mb-8">
+                        <h2 className="text-3xl font-black text-brand tracking-tight">Taktik speichern</h2>
+                        <button onClick={() => setShowSaveModal(false)} className="p-2 hover:bg-slate-50 rounded-full transition-colors text-slate-400">
+                            <X className="w-6 h-6" />
+                        </button>
+                    </div>
+                    <div className="space-y-8">
+                        <div className="space-y-2">
+                            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-1">Taktik-Name</label>
+                            <input
+                                autoFocus
+                                type="text"
+                                value={tacticName}
+                                onChange={(e) => setTacticName(e.target.value)}
+                                placeholder="z.B. Power-Play corner"
+                                className="w-full bg-slate-50 border border-slate-100 rounded-2xl px-5 py-3.5 focus:outline-none focus:border-brand/30 focus:bg-white transition-all text-sm font-medium shadow-inner"
+                            />
+                        </div>
+                        <div className="bg-slate-50 p-6 rounded-2xl border border-slate-100 text-[10px] text-slate-400 font-black uppercase tracking-widest space-y-2 shadow-inner">
+                            <p className="flex justify-between"><span>Modus</span> <span className="text-slate-900">{mode === "futsal" ? "Futsal" : "Fußball"}</span></p>
+                            <p className="flex justify-between"><span>Spieler</span> <span className="text-slate-900">{playersOnPitch.length}</span></p>
+                            <p className="flex justify-between"><span>Zeichnungen</span> <span className="text-slate-900">{paths.length > 0 ? "Ja" : "Nein"}</span></p>
+                        </div>
+                        <div className="flex gap-4">
                             <button
-                                onClick={() => setShowLoadModal(true)}
-                                className="text-brand hover:text-brand-dark transition-colors"
+                                disabled={isSaving || !tacticName}
+                                onClick={handleSaveTactic}
+                                className="flex-1 bg-brand hover:bg-brand-dark disabled:opacity-50 text-white py-4 rounded-2xl font-black uppercase text-xs tracking-widest transition-all flex items-center justify-center gap-2 shadow-xl shadow-brand/20 active:scale-95"
                             >
-                                <Download className="w-4 h-4" />
+                                {isSaving ? "Speichert..." : <><Check className="w-5 h-5" /> Speichern</>}
                             </button>
                         </div>
-                        <div className="flex-1 overflow-y-auto p-6 space-y-4 custom-scrollbar">
-                            {savedTactics
+                    </div>
+                </motion.div>
+            </div>
+        )
+    }
+
+    {
+        showLoadModal && (
+            <div className="fixed inset-0 z-[100] flex items-center justify-center p-6">
+                <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    onClick={() => setShowLoadModal(false)}
+                    className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+                />
+                <motion.div
+                    initial={{ opacity: 0, scale: 0.95, y: 20 }}
+                    animate={{ opacity: 1, scale: 1, y: 0 }}
+                    exit={{ opacity: 0, scale: 0.95, y: 20 }}
+                    className="relative w-full max-w-xl bg-white border border-slate-100 rounded-[2.5rem] p-10 shadow-2xl max-h-[80vh] flex flex-col"
+                >
+                    <div className="flex items-center justify-between mb-8 flex-shrink-0">
+                        <h2 className="text-3xl font-black text-brand tracking-tight">Alle Taktiken</h2>
+                        <button onClick={() => setShowLoadModal(false)} className="p-2 hover:bg-slate-50 rounded-full transition-colors text-slate-400">
+                            <X className="w-6 h-6" />
+                        </button>
+                    </div>
+
+                    <div className="flex-1 overflow-y-auto space-y-4 pr-2 custom-scrollbar">
+                        {savedTactics.filter(t => t.mode === mode).length === 0 ? (
+                            <div className="text-center py-16 text-slate-300">
+                                <div className="w-20 h-20 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-6 shadow-inner">
+                                    <Download className="w-8 h-8" />
+                                </div>
+                                <p className="font-black uppercase text-[10px] tracking-widest">Noch keine Taktiken gespeichert.</p>
+                            </div>
+                        ) : (
+                            savedTactics
                                 .filter(t => t.mode === mode)
                                 .map(t => (
                                     <div
                                         key={t._id}
-                                        onClick={() => !editingTacticId && loadTactic(t)}
-                                        className={cn(
-                                            "group relative bg-white border border-slate-100 rounded-2xl p-4 transition-all",
-                                            !editingTacticId ? "cursor-pointer hover:shadow-lg hover:shadow-brand/5 hover:border-brand/20" : ""
-                                        )}
+                                        onClick={() => loadTactic(t)}
+                                        className="group flex items-center justify-between p-6 bg-white border border-slate-100 rounded-3xl hover:shadow-xl hover:shadow-brand/5 hover:border-brand/20 cursor-pointer transition-all shadow-sm"
                                     >
-                                        <div className="flex justify-between items-start mb-2">
-                                            <span className={cn(
-                                                "px-2 py-1 rounded-md text-[8px] font-black uppercase tracking-wide",
+                                        <div className="flex items-center gap-6">
+                                            <div className={cn(
+                                                "w-14 h-14 rounded-2xl flex items-center justify-center font-black text-[10px] p-2 text-center shadow-inner uppercase tracking-tighter",
                                                 t.mode === "futsal" ? "bg-orange-50 text-orange-500" : "bg-blue-50 text-blue-500"
                                             )}>
                                                 {t.mode === "futsal" ? "Futsal" : "11v11"}
-                                            </span>
-                                            {isAdmin && !editingTacticId && (
-                                                <div className="flex gap-1">
-                                                    <button
-                                                        onClick={(e) => startEditingTactic(t, e)}
-                                                        className="p-1.5 hover:bg-slate-100 text-slate-300 hover:text-brand rounded-lg transition-colors"
-                                                    >
-                                                        <Pencil className="w-3.5 h-3.5" />
-                                                    </button>
-                                                    <button
-                                                        onClick={(e) => deleteSavedTactic(t._id!, e)}
-                                                        className="p-1.5 hover:bg-red-50 text-slate-300 hover:text-red-500 rounded-lg transition-colors"
-                                                    >
-                                                        <Trash2 className="w-3.5 h-3.5" />
-                                                    </button>
-                                                </div>
-                                            )}
-                                        </div>
-
-                                        {editingTacticId === t._id ? (
-                                            <div className="mt-2 space-y-2" onClick={e => e.stopPropagation()}>
-                                                <input
-                                                    type="text"
-                                                    value={editName}
-                                                    onChange={(e) => setEditName(e.target.value)}
-                                                    className="w-full bg-slate-50 border border-slate-200 rounded-lg px-2 py-1 text-sm font-bold focus:outline-none focus:border-brand/30"
-                                                    autoFocus
-                                                />
-                                                <div className="flex gap-2">
-                                                    <button onClick={saveTacticName} className="px-3 py-1 bg-brand text-white text-[10px] font-bold rounded-md uppercase tracking-wide">
-                                                        Speichern
-                                                    </button>
-                                                    <button onClick={cancelEditingTactic} className="px-3 py-1 bg-slate-100 text-slate-500 text-[10px] font-bold rounded-md uppercase tracking-wide">
-                                                        Abbrechen
-                                                    </button>
-                                                </div>
                                             </div>
-                                        ) : (
-                                            <>
-                                                <h4 className="font-bold text-slate-900 text-sm mb-1">{t.name}</h4>
-                                                <p className="text-[10px] text-slate-400 font-medium">
-                                                    {new Date(t.createdAt!).toLocaleDateString('de-DE')}
+                                            <div>
+                                                <h3 className="font-black text-slate-900 text-lg tracking-tight">{t.name}</h3>
+                                                <p className="text-[10px] text-slate-400 font-black uppercase tracking-widest">
+                                                    {t.players.length} Spieler • {new Date(t.createdAt!).toLocaleDateString('de-DE')}
                                                 </p>
-                                            </>
-                                        )}
-                                    </div>
-                                ))}
-                        </div>
-                    </div>
-
-                    <div className="p-8 border-t border-slate-100 bg-white">
-                        {isDrawMode && isAdmin && (
-                            <div className="space-y-4 mb-8">
-                                <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-1">Farbe wählen</h3>
-                                <div className="grid grid-cols-3 gap-3">
-                                    {["#ef4444", "#3b82f6", "#22c55e", "#eab308", "#ffffff", "#000000"].map(c => (
-                                        <button
-                                            key={c}
-                                            onClick={() => setDrawColor(c)}
-                                            className={cn(
-                                                "w-full aspect-square rounded-xl border-4 transition-all shadow-sm",
-                                                drawColor === c ? "border-brand scale-110 shadow-lg" : "border-white"
-                                            )}
-                                            style={{ backgroundColor: c }}
-                                        />
-                                    ))}
-                                </div>
-                            </div>
-                        )}
-
-                        <div className="space-y-4">
-                            <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-1">Team Info</h3>
-                            <div className="space-y-4 bg-white p-6 rounded-[2rem] border border-slate-100 shadow-xl shadow-slate-200/50">
-                                <div className="flex justify-between items-center">
-                                    <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Auf Feld</span>
-                                    <span className="text-xl font-black text-brand tracking-tight">{playersOnPitch.length}</span>
-                                </div>
-                                <div className="flex justify-between items-center">
-                                    <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Torhüter</span>
-                                    <span className="text-xl font-black text-yellow-500 tracking-tight">
-                                        {playersOnPitch.filter(p => p.color === "bg-yellow-500").length}
-                                    </span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div className="p-6 border-t border-slate-100 bg-slate-50">
-                        <p className="text-[10px] text-slate-400 leading-relaxed italic font-medium">
-                            {isAdmin
-                                ? "💡 Tipp: Zeichne Laufwege, speichere Formationen und verwalte Taktiken."
-                                : "💡 Info: Du kannst Taktiken ansehen und laden, aber nicht bearbeiten."}
-                        </p>
-                    </div>
-                </aside>
-            </main >
-
-            {/* Modals */}
-            <AnimatePresence>
-                {
-                    showSaveModal && (
-                        <div className="fixed inset-0 z-[100] flex items-center justify-center p-6">
-                            <motion.div
-                                initial={{ opacity: 0 }}
-                                animate={{ opacity: 1 }}
-                                exit={{ opacity: 0 }}
-                                onClick={() => setShowSaveModal(false)}
-                                className="absolute inset-0 bg-black/60 backdrop-blur-sm"
-                            />
-                            <motion.div
-                                initial={{ opacity: 0, scale: 0.95, y: 20 }}
-                                animate={{ opacity: 1, scale: 1, y: 0 }}
-                                exit={{ opacity: 0, scale: 0.95, y: 20 }}
-                                className="relative w-full max-w-md bg-white border border-slate-100 rounded-[2.5rem] p-10 shadow-2xl"
-                            >
-                                <div className="flex items-center justify-between mb-8">
-                                    <h2 className="text-3xl font-black text-brand tracking-tight">Taktik speichern</h2>
-                                    <button onClick={() => setShowSaveModal(false)} className="p-2 hover:bg-slate-50 rounded-full transition-colors text-slate-400">
-                                        <X className="w-6 h-6" />
-                                    </button>
-                                </div>
-                                <div className="space-y-8">
-                                    <div className="space-y-2">
-                                        <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-1">Taktik-Name</label>
-                                        <input
-                                            autoFocus
-                                            type="text"
-                                            value={tacticName}
-                                            onChange={(e) => setTacticName(e.target.value)}
-                                            placeholder="z.B. Power-Play corner"
-                                            className="w-full bg-slate-50 border border-slate-100 rounded-2xl px-5 py-3.5 focus:outline-none focus:border-brand/30 focus:bg-white transition-all text-sm font-medium shadow-inner"
-                                        />
-                                    </div>
-                                    <div className="bg-slate-50 p-6 rounded-2xl border border-slate-100 text-[10px] text-slate-400 font-black uppercase tracking-widest space-y-2 shadow-inner">
-                                        <p className="flex justify-between"><span>Modus</span> <span className="text-slate-900">{mode === "futsal" ? "Futsal" : "Fußball"}</span></p>
-                                        <p className="flex justify-between"><span>Spieler</span> <span className="text-slate-900">{playersOnPitch.length}</span></p>
-                                        <p className="flex justify-between"><span>Zeichnungen</span> <span className="text-slate-900">{paths.length > 0 ? "Ja" : "Nein"}</span></p>
-                                    </div>
-                                    <div className="flex gap-4">
-                                        <button
-                                            disabled={isSaving || !tacticName}
-                                            onClick={handleSaveTactic}
-                                            className="flex-1 bg-brand hover:bg-brand-dark disabled:opacity-50 text-white py-4 rounded-2xl font-black uppercase text-xs tracking-widest transition-all flex items-center justify-center gap-2 shadow-xl shadow-brand/20 active:scale-95"
-                                        >
-                                            {isSaving ? "Speichert..." : <><Check className="w-5 h-5" /> Speichern</>}
-                                        </button>
-                                    </div>
-                                </div>
-                            </motion.div>
-                        </div>
-                    )
-                }
-
-                {
-                    showLoadModal && (
-                        <div className="fixed inset-0 z-[100] flex items-center justify-center p-6">
-                            <motion.div
-                                initial={{ opacity: 0 }}
-                                animate={{ opacity: 1 }}
-                                exit={{ opacity: 0 }}
-                                onClick={() => setShowLoadModal(false)}
-                                className="absolute inset-0 bg-black/60 backdrop-blur-sm"
-                            />
-                            <motion.div
-                                initial={{ opacity: 0, scale: 0.95, y: 20 }}
-                                animate={{ opacity: 1, scale: 1, y: 0 }}
-                                exit={{ opacity: 0, scale: 0.95, y: 20 }}
-                                className="relative w-full max-w-xl bg-white border border-slate-100 rounded-[2.5rem] p-10 shadow-2xl max-h-[80vh] flex flex-col"
-                            >
-                                <div className="flex items-center justify-between mb-8 flex-shrink-0">
-                                    <h2 className="text-3xl font-black text-brand tracking-tight">Alle Taktiken</h2>
-                                    <button onClick={() => setShowLoadModal(false)} className="p-2 hover:bg-slate-50 rounded-full transition-colors text-slate-400">
-                                        <X className="w-6 h-6" />
-                                    </button>
-                                </div>
-
-                                <div className="flex-1 overflow-y-auto space-y-4 pr-2 custom-scrollbar">
-                                    {savedTactics.filter(t => t.mode === mode).length === 0 ? (
-                                        <div className="text-center py-16 text-slate-300">
-                                            <div className="w-20 h-20 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-6 shadow-inner">
-                                                <Download className="w-8 h-8" />
                                             </div>
-                                            <p className="font-black uppercase text-[10px] tracking-widest">Noch keine Taktiken gespeichert.</p>
                                         </div>
-                                    ) : (
-                                        savedTactics
-                                            .filter(t => t.mode === mode)
-                                            .map(t => (
-                                                <div
-                                                    key={t._id}
-                                                    onClick={() => loadTactic(t)}
-                                                    className="group flex items-center justify-between p-6 bg-white border border-slate-100 rounded-3xl hover:shadow-xl hover:shadow-brand/5 hover:border-brand/20 cursor-pointer transition-all shadow-sm"
+                                        <div className="flex items-center gap-4">
+                                            {isAdmin && (
+                                                <button
+                                                    onClick={(e) => deleteSavedTactic(t._id!, e)}
+                                                    className="p-3 bg-white border border-slate-100 shadow-sm hover:bg-brand hover:text-white rounded-xl transition-all opacity-0 group-hover:opacity-100"
                                                 >
-                                                    <div className="flex items-center gap-6">
-                                                        <div className={cn(
-                                                            "w-14 h-14 rounded-2xl flex items-center justify-center font-black text-[10px] p-2 text-center shadow-inner uppercase tracking-tighter",
-                                                            t.mode === "futsal" ? "bg-orange-50 text-orange-500" : "bg-blue-50 text-blue-500"
-                                                        )}>
-                                                            {t.mode === "futsal" ? "Futsal" : "11v11"}
-                                                        </div>
-                                                        <div>
-                                                            <h3 className="font-black text-slate-900 text-lg tracking-tight">{t.name}</h3>
-                                                            <p className="text-[10px] text-slate-400 font-black uppercase tracking-widest">
-                                                                {t.players.length} Spieler • {new Date(t.createdAt!).toLocaleDateString('de-DE')}
-                                                            </p>
-                                                        </div>
-                                                    </div>
-                                                    <div className="flex items-center gap-4">
-                                                        {isAdmin && (
-                                                            <button
-                                                                onClick={(e) => deleteSavedTactic(t._id!, e)}
-                                                                className="p-3 bg-white border border-slate-100 shadow-sm hover:bg-brand hover:text-white rounded-xl transition-all opacity-0 group-hover:opacity-100"
-                                                            >
-                                                                <Trash2 className="w-4 h-4" />
-                                                            </button>
-                                                        )}
-                                                        <ChevronRight className="w-6 h-6 text-slate-200 group-hover:text-brand transition-colors" />
-                                                    </div>
-                                                </div>
-                                            ))
-                                    )}
-                                </div>
-                            </motion.div>
-                        </div>
-                    )
-                }
+                                                    <Trash2 className="w-4 h-4" />
+                                                </button>
+                                            )}
+                                            <ChevronRight className="w-6 h-6 text-slate-200 group-hover:text-brand transition-colors" />
+                                        </div>
+                                    </div>
+                                ))
+                        )}
+                    </div>
+                </motion.div>
+            </div>
+        )
+    }
             </AnimatePresence >
 
-            <style jsx global>{`
+        <style jsx global>{`
                 .custom-scrollbar::-webkit-scrollbar {
                     width: 6px;
                 }
