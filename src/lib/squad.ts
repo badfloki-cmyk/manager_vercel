@@ -9,6 +9,7 @@ export interface Player {
     team: '1. Mannschaft' | '2. Mannschaft';
     status: 'Active' | 'Injured' | 'Away';
     role: 'Captain' | 'Regular';
+    photoUrl?: string;
     stats: {
         goals: number;
         assists: number;
