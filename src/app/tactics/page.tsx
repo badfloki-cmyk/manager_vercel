@@ -201,8 +201,8 @@ export default function TacticsPage() {
                         <Link href="/" className="p-2 hover:bg-slate-50 rounded-full transition-colors text-slate-900">
                             <ArrowLeft className="w-5 h-5" />
                         </Link>
-                        <h1 className="text-xl font-black text-brand tracking-tight flex items-center gap-3">
-                            <LayoutDashboard className="w-5 h-5" />
+                        <Image src="/logo_new.png" alt="Logo" width={100} height={25} className="h-8 w-auto object-contain rounded shadow-sm" />
+                        <h1 className="text-xl font-black text-brand tracking-tight">
                             Taktik-Board
                         </h1>
                     </div>
@@ -456,17 +456,15 @@ export default function TacticsPage() {
                                     </div>
 
                                     {/* Delete indicator */}
-                                    {!isDrawMode && (
-                                        <button
-                                            onClick={(e) => {
-                                                e.stopPropagation();
-                                                removePlayerFromPitch(player.id);
-                                            }}
-                                            className="absolute -top-1 -right-1 w-4 h-4 bg-slate-950 border border-slate-800 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity z-50 hover:bg-brand hover:border-brand"
-                                        >
-                                            <X className="w-2.5 h-2.5 text-white" />
-                                        </button>
-                                    )}
+                                    <button
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            removePlayerFromPitch(player.id);
+                                        }}
+                                        className="absolute -top-2 -right-2 w-6 h-6 bg-brand border-2 border-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity z-50 shadow-lg hover:scale-110 active:scale-95"
+                                    >
+                                        <X className="w-3.5 h-3.5 text-white" />
+                                    </button>
                                 </motion.div>
                             ))}
                         </AnimatePresence>

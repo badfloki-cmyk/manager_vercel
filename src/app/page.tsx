@@ -40,13 +40,6 @@ const features = [
     color: "bg-brand/10 text-brand",
   },
   {
-    title: "Statistiken",
-    description: "Leistungsanalyse und Leaderboards für das gesamte Team.",
-    icon: Trophy,
-    href: "/stats",
-    color: "bg-brand/10 text-brand",
-  },
-  {
     title: "Kommunikation",
     description: "Interne Nachrichten und Datei-Austausch für alle Teams.",
     icon: MessageSquare,
@@ -96,7 +89,7 @@ export default function Home() {
           >
             <div className="flex justify-center mb-12">
               <Image
-                src="/logo.jpg"
+                src="/logo_new.png"
                 alt="ERS Pattensen Logo"
                 width={400}
                 height={80}

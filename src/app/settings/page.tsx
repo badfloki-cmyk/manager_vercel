@@ -74,7 +74,7 @@ export default function SettingsPage() {
                         <Link href="/" className="p-2 hover:bg-slate-50 rounded-full transition-colors text-slate-900">
                             <ArrowLeft className="w-5 h-5" />
                         </Link>
-                        <Image src="/logo.jpg" alt="Logo" width={100} height={25} className="h-8 w-auto object-contain rounded shadow-sm" />
+                        <Image src="/logo_new.png" alt="Logo" width={100} height={25} className="h-8 w-auto object-contain rounded shadow-sm" />
                         <h1 className="text-2xl font-black text-brand tracking-tight flex items-center gap-3">
                             <Settings className="w-6 h-6" />
                             Einstellungen
@@ -94,7 +94,7 @@ export default function SettingsPage() {
                     <div className="relative flex items-center gap-8">
                         <div className="w-24 h-24 rounded-3xl bg-slate-50 border border-slate-100 p-4 flex items-center justify-center overflow-hidden shadow-inner">
                             <Image
-                                src="/logo.jpg"
+                                src="/logo_new.png"
                                 alt="ERS Logo"
                                 width={80}
                                 height={80}

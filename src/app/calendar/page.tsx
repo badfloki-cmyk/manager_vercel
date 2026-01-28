@@ -106,7 +106,7 @@ export default function CalendarPage() {
                         <Link href="/" className="p-2 hover:bg-slate-50 rounded-full transition-colors text-slate-900">
                             <ArrowLeft className="w-5 h-5" />
                         </Link>
-                        <Image src="/logo.jpg" alt="Logo" width={100} height={25} className="h-8 w-auto object-contain rounded shadow-sm" />
+                        <Image src="/logo_new.png" alt="Logo" width={100} height={25} className="h-8 w-auto object-contain rounded shadow-sm" />
                         <h1 className="text-2xl font-black text-brand tracking-tight">Terminkalender</h1>
                     </div>
                     <div className="flex bg-white rounded-xl p-1 border border-slate-100 shadow-inner">
@@ -201,9 +201,11 @@ export default function CalendarPage() {
                                                             </div>
                                                         </div>
 
-                                                        <p className="text-slate-500 text-sm mb-6 line-clamp-1 group-hover:line-clamp-none transition-all font-medium leading-relaxed">
-                                                            {event.description || "Keine Beschreibung vorhanden."}
-                                                        </p>
+                                                        {event.description && (
+                                                            <p className="text-slate-500 text-sm mb-6 line-clamp-1 group-hover:line-clamp-none transition-all font-medium leading-relaxed">
+                                                                {event.description}
+                                                            </p>
+                                                        )}
 
                                                         <div className="flex flex-wrap gap-6 text-xs font-black uppercase tracking-wider text-slate-400">
                                                             <div className="flex items-center gap-2">

@@ -96,7 +96,7 @@ export default function MessagesPage() {
                         <Link href="/" className="p-2 hover:bg-slate-50 rounded-full transition-colors text-slate-900">
                             <ArrowLeft className="w-5 h-5" />
                         </Link>
-                        <Image src="/logo.jpg" alt="Logo" width={100} height={25} className="h-8 w-auto object-contain rounded shadow-sm" />
+                        <Image src="/logo_new.png" alt="Logo" width={100} height={25} className="h-8 w-auto object-contain rounded shadow-sm" />
                         <h1 className="text-2xl font-black text-brand tracking-tight flex items-center gap-3">
                             <MessageSquare className="w-6 h-6" />
                             Kommunikation
