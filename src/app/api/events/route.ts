@@ -19,15 +19,15 @@ export async function GET(request: Request) {
         const events = await Event.find(query).sort({ date: 1 });
 
         return NextResponse.json({ success: true, events });
-    } catch (error) {
-        return NextResponse.json({ success: false, message: (error as Error).message }, { status: 500 });
+    } catch {
+        return NextResponse.json({ error: "Failed to fetch events" }, { status: 500 });
     }
 }
 
 export async function POST(request: Request) {
     try {
         const session = await getServerSession(authOptions);
-        if (!session || (session.user as any).role !== "admin") {
+        if (!session || session.user.role !== "admin") {
             return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
         }
 

@@ -29,7 +29,7 @@ interface Message {
 
 export default function MessagesPage() {
     const { data: session } = useSession();
-    const isAdmin = (session?.user as any)?.role === "admin";
+    const isAdmin = session?.user?.role === "admin";
 
     const [messages, setMessages] = useState<Message[]>([]);
     const [isLoading, setIsLoading] = useState(true);
@@ -44,8 +44,8 @@ export default function MessagesPage() {
             const res = await fetch("/api/messages");
             const data = await res.json();
             setMessages(data.messages || []);
-        } catch (err) {
-            console.error("Fetch error:", err);
+        } catch {
+            console.error("Fetch error");
         } finally {
             setIsLoading(false);
         }
@@ -74,8 +74,8 @@ export default function MessagesPage() {
                 setNewMessage("");
                 fetchMessages();
             }
-        } catch (err) {
-            console.error("Send error:", err);
+        } catch {
+            console.error("Send error");
         } finally {
             setIsSending(false);
         }
@@ -220,7 +220,7 @@ export default function MessagesPage() {
                             <div className="flex gap-4 mb-4">
                                 <select
                                     value={messageType}
-                                    onChange={(e) => setMessageType(e.target.value as any)}
+                                    onChange={(e) => setMessageType(e.target.value as "general" | "announcement")}
                                     className="bg-slate-50 border border-slate-100 rounded-xl px-4 py-2 text-[10px] font-black uppercase tracking-widest"
                                 >
                                     <option value="general">Allgemein</option>
@@ -228,7 +228,7 @@ export default function MessagesPage() {
                                 </select>
                                 <select
                                     value={messageTeam}
-                                    onChange={(e) => setMessageTeam(e.target.value as any)}
+                                    onChange={(e) => setMessageTeam(e.target.value as "Alle" | "1. Mannschaft" | "2. Mannschaft")}
                                     className="bg-slate-50 border border-slate-100 rounded-xl px-4 py-2 text-[10px] font-black uppercase tracking-widest"
                                 >
                                     <option value="Alle">Alle Teams</option>

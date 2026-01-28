@@ -22,7 +22,7 @@ import { getEvents, createEvent, updateEvent, deleteEvent, Event } from "@/lib/e
 
 export default function CalendarPage() {
     const { data: session } = useSession();
-    const isAdmin = (session?.user as any)?.role === "admin";
+    const isAdmin = session?.user?.role === "admin";
     const [team, setTeam] = useState<"1. Mannschaft" | "2. Mannschaft" | "Both">("Both");
     const [events, setEvents] = useState<Event[]>([]);
     const [isLoading, setIsLoading] = useState(true);

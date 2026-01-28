@@ -59,7 +59,7 @@ import { LogOut } from "lucide-react";
 
 export default function Home() {
   const { data: session } = useSession();
-  const isAdmin = (session?.user as any)?.role === "admin";
+  const isAdmin = session?.user?.role === "admin";
 
   const [stats, setStats] = useState({ players: 0, events: 0 });
 

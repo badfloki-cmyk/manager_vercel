@@ -32,7 +32,7 @@ export default function LoginPage() {
                 router.push("/");
                 router.refresh();
             }
-        } catch (err) {
+        } catch {
             setError("Ein Fehler ist aufgetreten. Bitte versuchen Sie es erneut.");
         } finally {
             setIsLoading(false);

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
     Settings,
@@ -11,12 +11,25 @@ import {
     Bell,
     Shield,
     Database,
-    ExternalLink,
-    ChevronRight
+    ChevronRight,
+    UserPlus,
+    UserCircle,
+    ShieldAlert,
+    Loader2,
+    Save,
+    Trash2
 } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
 import { cn } from "@/lib/utils";
+import { useSession } from "next-auth/react";
+
+interface User {
+    _id: string;
+    name: string;
+    email: string;
+    role: string;
+}
 
 interface SettingSection {
     title: string;
@@ -36,7 +49,6 @@ const settingSections: SettingSection[] = [
         title: "Benutzer & Rollen",
         description: "Trainer, Spieler und Berechtigungen verwalten",
         icon: Users,
-        badge: "Bald"
     },
     {
         title: "Erscheinungsbild",
@@ -62,45 +74,41 @@ const settingSections: SettingSection[] = [
     },
 ];
 
-import { useEffect } from "react";
-import { useSession } from "next-auth/react";
-import { UserPlus, UserCircle, ShieldAlert, Loader2, Save, Trash2 } from "lucide-react";
-
 export default function SettingsPage() {
     const { data: session } = useSession();
-    const isAdmin = (session?.user as any)?.role === "admin";
+    const isAdmin = session?.user?.role === "admin";
 
     const [activeSection, setActiveSection] = useState<string | null>(null);
-    const [users, setUsers] = useState<any[]>([]);
+    const [users, setUsers] = useState<User[]>([]);
     const [isLoadingUsers, setIsLoadingUsers] = useState(false);
 
     // New User form
     const [newUserName, setNewUserName] = useState("");
     const [newUserEmail, setNewUserEmail] = useState("");
     const [newUserPassword, setNewUserPassword] = useState("");
-    const [newUserRole, setNewUserRole] = useState<"player" | "admin">("player");
+    const [newUserRole, setNewUserRole] = useState<"player" | "admin" | string>("player");
     const [isSaving, setIsSaving] = useState(false);
     const [saveStatus, setSaveStatus] = useState<{ type: 'success' | 'error', message: string } | null>(null);
 
-    const fetchUsers = async () => {
+    const fetchUsers = useCallback(async () => {
         if (!isAdmin) return;
         setIsLoadingUsers(true);
         try {
             const res = await fetch("/api/users");
             const data = await res.json();
             setUsers(data.users || []);
-        } catch (err) {
-            console.error("Fetch users error:", err);
+        } catch (_err) {
+            console.error("Fetch users error:", _err);
         } finally {
             setIsLoadingUsers(false);
         }
-    };
+    }, [isAdmin]);
 
     useEffect(() => {
         if (activeSection === "Benutzer & Rollen") {
             fetchUsers();
         }
-    }, [activeSection]);
+    }, [activeSection, fetchUsers]);
 
     const handleCreateUser = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -128,7 +136,7 @@ export default function SettingsPage() {
             } else {
                 setSaveStatus({ type: 'error', message: data.error || "Fehler beim Erstellen." });
             }
-        } catch (err) {
+        } catch {
             setSaveStatus({ type: 'error', message: "Verbindungsfehler." });
         } finally {
             setIsSaving(false);
@@ -145,8 +153,8 @@ export default function SettingsPage() {
             } else {
                 alert(data.error || "Fehler beim Löschen.");
             }
-        } catch (err) {
-            console.error("Delete user error:", err);
+        } catch (_err) {
+            console.error("Delete user error:", _err);
         }
     };
 
@@ -299,7 +307,7 @@ export default function SettingsPage() {
                                                         <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Rolle</label>
                                                         <select
                                                             value={newUserRole}
-                                                            onChange={(e) => setNewUserRole(e.target.value as any)}
+                                                            onChange={(e) => setNewUserRole(e.target.value)}
                                                             className="w-full bg-white border border-slate-200 rounded-xl px-4 py-3 text-sm font-black uppercase tracking-widest focus:border-brand/30 outline-none transition-all appearance-none cursor-pointer"
                                                         >
                                                             <option value="player">Spieler (Lesen)</option>

@@ -10,14 +10,14 @@ export async function DELETE(
 ) {
     try {
         const session = await getServerSession(authOptions);
-        if (!session || (session.user as any).role !== "admin") {
+        if (!session || session.user.role !== "admin") {
             return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
         }
 
         await connectDB();
 
         // Prevent deleting yourself
-        if ((session.user as any).id === params.id) {
+        if (session.user.id === params.id) {
             return NextResponse.json({ error: "Du kannst deinen eigenen Account nicht löschen" }, { status: 400 });
         }
 

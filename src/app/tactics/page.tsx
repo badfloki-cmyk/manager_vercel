@@ -15,10 +15,7 @@ import {
     X,
     Check,
     ChevronRight,
-    Search,
-    Pin,
-    Loader2,
-    Lock
+    Search
 } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
