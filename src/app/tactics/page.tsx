@@ -533,9 +533,9 @@ export default function TacticsPage() {
                         </div>
                     </div>
 
-                    {isDrawMode && isAdmin && (
-                        <div className="p-8 border-t border-slate-100 bg-white">
-                            <div className="space-y-4">
+                    <div className="p-8 border-t border-slate-100 bg-white">
+                        {isDrawMode && isAdmin && (
+                            <div className="space-y-4 mb-8">
                                 <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-1">Farbe wählen</h3>
                                 <div className="grid grid-cols-3 gap-3">
                                     {["#ef4444", "#3b82f6", "#22c55e", "#eab308", "#ffffff", "#000000"].map(c => (
@@ -551,26 +551,24 @@ export default function TacticsPage() {
                                     ))}
                                 </div>
                             </div>
-                    )}
+                        )}
 
-                            <div className="space-y-4">
-                                <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-1">Team Info</h3>
-                                <div className="space-y-4 bg-white p-6 rounded-[2rem] border border-slate-100 shadow-xl shadow-slate-200/50">
-                                    <div className="flex justify-between items-center">
-                                        <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Auf Feld</span>
-                                        <span className="text-xl font-black text-brand tracking-tight">{playersOnPitch.length}</span>
-                                    </div>
-                                    <div className="flex justify-between items-center">
-                                        <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Torhüter</span>
-                                        <span className="text-xl font-black text-yellow-500 tracking-tight">
-                                            {playersOnPitch.filter(p => p.color === "bg-yellow-500").length}
-                                        </span>
-                                    </div>
+                        <div className="space-y-4">
+                            <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-1">Team Info</h3>
+                            <div className="space-y-4 bg-white p-6 rounded-[2rem] border border-slate-100 shadow-xl shadow-slate-200/50">
+                                <div className="flex justify-between items-center">
+                                    <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Auf Feld</span>
+                                    <span className="text-xl font-black text-brand tracking-tight">{playersOnPitch.length}</span>
+                                </div>
+                                <div className="flex justify-between items-center">
+                                    <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Torhüter</span>
+                                    <span className="text-xl font-black text-yellow-500 tracking-tight">
+                                        {playersOnPitch.filter(p => p.color === "bg-yellow-500").length}
+                                    </span>
                                 </div>
                             </div>
-
                         </div>
-                    )}
+                    </div>
 
                     <div className="p-6 border-t border-slate-100 bg-slate-50">
                         <p className="text-[10px] text-slate-400 leading-relaxed italic font-medium">
