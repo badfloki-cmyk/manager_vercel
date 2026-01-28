@@ -11,6 +11,7 @@ import {
     Pin
 } from "lucide-react";
 import Link from "next/link";
+import Image from "next/image";
 import { cn } from "@/lib/utils";
 
 interface Message {
@@ -95,8 +96,9 @@ export default function MessagesPage() {
                         <Link href="/" className="p-2 hover:bg-slate-800 rounded-full transition-colors">
                             <ArrowLeft className="w-5 h-5" />
                         </Link>
+                        <Image src="/logo.jpg" alt="Logo" width={100} height={25} className="h-6 w-auto object-contain rounded" />
                         <h1 className="text-2xl font-bold flex items-center gap-3">
-                            <MessageSquare className="w-6 h-6 text-red-500" />
+                            <MessageSquare className="w-6 h-6 text-brand" />
                             Kommunikation
                         </h1>
                     </div>
@@ -105,7 +107,7 @@ export default function MessagesPage() {
                             onClick={() => setFilter("all")}
                             className={cn(
                                 "px-4 py-1.5 rounded-md text-sm font-medium transition-all",
-                                filter === "all" ? "bg-red-600 text-white shadow-lg" : "text-slate-400 hover:text-white"
+                                filter === "all" ? "bg-brand-dark text-white shadow-lg" : "text-slate-400 hover:text-white"
                             )}
                         >
                             Alle
@@ -114,7 +116,7 @@ export default function MessagesPage() {
                             onClick={() => setFilter("announcements")}
                             className={cn(
                                 "px-4 py-1.5 rounded-md text-sm font-medium transition-all flex items-center gap-2",
-                                filter === "announcements" ? "bg-red-600 text-white shadow-lg" : "text-slate-400 hover:text-white"
+                                filter === "announcements" ? "bg-brand-dark text-white shadow-lg" : "text-slate-400 hover:text-white"
                             )}
                         >
                             <Bell className="w-3 h-3" />
@@ -128,17 +130,17 @@ export default function MessagesPage() {
                 {/* Quick Stats */}
                 <div className="grid grid-cols-3 gap-4 mb-10">
                     <div className="bg-slate-900/50 border border-slate-800 rounded-2xl p-6 text-center">
-                        <MessageSquare className="w-6 h-6 text-red-500 mx-auto mb-2" />
+                        <MessageSquare className="w-6 h-6 text-brand mx-auto mb-2" />
                         <p className="text-2xl font-bold">{messages.length}</p>
                         <p className="text-xs text-slate-500 uppercase font-bold">Nachrichten</p>
                     </div>
                     <div className="bg-slate-900/50 border border-slate-800 rounded-2xl p-6 text-center">
-                        <Bell className="w-6 h-6 text-red-500 mx-auto mb-2" />
+                        <Bell className="w-6 h-6 text-brand mx-auto mb-2" />
                         <p className="text-2xl font-bold">{messages.filter(m => m.type === "announcement").length}</p>
                         <p className="text-xs text-slate-500 uppercase font-bold">Ankündigungen</p>
                     </div>
                     <div className="bg-slate-900/50 border border-slate-800 rounded-2xl p-6 text-center">
-                        <Pin className="w-6 h-6 text-red-500 mx-auto mb-2" />
+                        <Pin className="w-6 h-6 text-brand mx-auto mb-2" />
                         <p className="text-2xl font-bold">{messages.filter(m => m.pinned).length}</p>
                         <p className="text-xs text-slate-500 uppercase font-bold">Angepinnt</p>
                     </div>
@@ -169,10 +171,10 @@ export default function MessagesPage() {
                                 </div>
                                 <div className="flex items-center gap-2">
                                     {message.pinned && (
-                                        <Pin className="w-4 h-4 text-red-500" />
+                                        <Pin className="w-4 h-4 text-brand" />
                                     )}
                                     {message.type === "announcement" && (
-                                        <span className="px-2 py-0.5 bg-red-500/10 text-red-500 text-[10px] font-bold uppercase rounded ring-1 ring-red-500/20">
+                                        <span className="px-2 py-0.5 bg-brand/10 text-brand text-[10px] font-bold uppercase rounded ring-1 ring-brand/20">
                                             Wichtig
                                         </span>
                                     )}
@@ -197,10 +199,10 @@ export default function MessagesPage() {
                             value={newMessage}
                             onChange={(e) => setNewMessage(e.target.value)}
                             placeholder="Nachricht schreiben... (Demo)"
-                            className="flex-1 bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-red-500/50 transition-colors"
+                            className="flex-1 bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-brand/50 transition-colors"
                         />
                         <button
-                            className="px-6 py-3 bg-red-600 hover:bg-red-700 rounded-xl font-medium transition-all active:scale-95 flex items-center gap-2"
+                            className="px-6 py-3 bg-brand hover:bg-brand-dark rounded-xl font-medium transition-all active:scale-95 flex items-center gap-2"
                             onClick={() => alert("Demo-Modus: Nachrichten werden nicht gespeichert.")}
                         >
                             <Send className="w-4 h-4" />

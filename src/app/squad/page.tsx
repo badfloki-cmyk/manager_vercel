@@ -164,7 +164,7 @@ export default function SquadPage() {
         >
             <div className="flex items-start justify-between mb-4">
                 <div className="flex items-center gap-4">
-                    <div className="w-14 h-14 rounded-xl bg-slate-800 flex items-center justify-center text-xl font-bold text-red-500 overflow-hidden relative border border-slate-700">
+                    <div className="w-14 h-14 rounded-xl bg-slate-800 flex items-center justify-center text-xl font-bold text-brand overflow-hidden relative border border-slate-700">
                         {player.photoUrl ? (
                             <Image
                                 src={player.photoUrl}
@@ -235,7 +235,7 @@ export default function SquadPage() {
                 </button>
                 <button
                     onClick={() => handleDeletePlayer(player._id)}
-                    className="p-2 hover:bg-red-500/10 hover:text-red-500 rounded-lg transition-all"
+                    className="p-2 hover:bg-brand/10 hover:text-brand rounded-lg transition-all"
                 >
                     <Trash2 className="w-4 h-4" />
                 </button>
@@ -252,6 +252,7 @@ export default function SquadPage() {
                         <Link href="/" className="p-2 hover:bg-slate-800 rounded-full transition-colors">
                             <ArrowLeft className="w-5 h-5" />
                         </Link>
+                        <Image src="/logo.jpg" alt="Logo" width={100} height={25} className="h-6 w-auto object-contain rounded" />
                         <h1 className="text-2xl font-bold">Kaderverwaltung</h1>
                     </div>
                     <div className="flex bg-slate-900 rounded-lg p-1 border border-slate-800">
@@ -259,7 +260,7 @@ export default function SquadPage() {
                             onClick={() => setTeam("1. Mannschaft")}
                             className={cn(
                                 "px-4 py-1.5 rounded-md text-sm font-medium transition-all",
-                                team === "1. Mannschaft" ? "bg-red-600 text-white shadow-lg" : "text-slate-400 hover:text-white"
+                                team === "1. Mannschaft" ? "bg-brand-dark text-white shadow-lg" : "text-slate-400 hover:text-white"
                             )}
                         >
                             1. Mannschaft
@@ -268,7 +269,7 @@ export default function SquadPage() {
                             onClick={() => setTeam("2. Mannschaft")}
                             className={cn(
                                 "px-4 py-1.5 rounded-md text-sm font-medium transition-all",
-                                team === "2. Mannschaft" ? "bg-red-600 text-white shadow-lg" : "text-slate-400 hover:text-white"
+                                team === "2. Mannschaft" ? "bg-brand-dark text-white shadow-lg" : "text-slate-400 hover:text-white"
                             )}
                         >
                             2. Mannschaft
@@ -287,12 +288,12 @@ export default function SquadPage() {
                             placeholder="Spieler suchen (Name, Position...)"
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
-                            className="w-full bg-slate-900 border border-slate-800 rounded-xl py-2.5 pl-10 pr-4 text-sm focus:outline-none focus:border-red-500/50 transition-colors"
+                            className="w-full bg-slate-900 border border-slate-800 rounded-xl py-2.5 pl-10 pr-4 text-sm focus:outline-none focus:border-brand/50 transition-colors"
                         />
                     </div>
                     <button
                         onClick={() => setIsModalOpen(true)}
-                        className="w-full md:w-auto flex items-center justify-center gap-2 bg-red-600 hover:bg-red-700 text-white px-6 py-2.5 rounded-xl font-medium transition-all active:scale-95 shadow-lg shadow-red-600/10"
+                        className="w-full md:w-auto flex items-center justify-center gap-2 bg-brand hover:bg-brand-dark text-white px-6 py-2.5 rounded-xl font-medium transition-all active:scale-95 shadow-lg shadow-brand/10"
                     >
                         <UserPlus className="w-4 h-4" />
                         Neuer Spieler
@@ -322,14 +323,14 @@ export default function SquadPage() {
                 {/* Player List */}
                 {isLoading ? (
                     <div className="flex justify-center py-20">
-                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-red-500" />
+                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-brand" />
                     </div>
                 ) : (
                     <>
                         {/* Active Players */}
                         <div className="mb-8">
                             <h2 className="text-lg font-bold mb-4 flex items-center gap-2">
-                                <Users className="w-5 h-5 text-red-500" />
+                                <Users className="w-5 h-5 text-brand" />
                                 Aktive Spieler ({activePlayers.length})
                             </h2>
                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -411,7 +412,7 @@ export default function SquadPage() {
                                 <div className="flex justify-center">
                                     <div
                                         onClick={() => fileInputRef.current?.click()}
-                                        className="relative w-24 h-24 rounded-2xl bg-slate-950 border-2 border-dashed border-slate-800 hover:border-red-500/50 transition-all cursor-pointer group flex items-center justify-center overflow-hidden"
+                                        className="relative w-24 h-24 rounded-2xl bg-slate-950 border-2 border-dashed border-slate-800 hover:border-brand/50 transition-all cursor-pointer group flex items-center justify-center overflow-hidden"
                                     >
                                         {previewUrl ? (
                                             <Image src={previewUrl} alt="Preview" fill className="object-cover" />
@@ -442,7 +443,7 @@ export default function SquadPage() {
                                             type="text"
                                             value={newPlayer.firstName}
                                             onChange={(e) => setNewPlayer({ ...newPlayer, firstName: e.target.value })}
-                                            className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 focus:outline-none focus:border-red-500/50 transition-colors text-sm"
+                                            className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 focus:outline-none focus:border-brand/50 transition-colors text-sm"
                                         />
                                     </div>
                                     <div className="space-y-1.5">
@@ -452,7 +453,7 @@ export default function SquadPage() {
                                             type="text"
                                             value={newPlayer.lastName}
                                             onChange={(e) => setNewPlayer({ ...newPlayer, lastName: e.target.value })}
-                                            className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 focus:outline-none focus:border-red-500/50 transition-colors text-sm"
+                                            className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 focus:outline-none focus:border-brand/50 transition-colors text-sm"
                                         />
                                     </div>
                                 </div>
@@ -465,7 +466,7 @@ export default function SquadPage() {
                                             type="number"
                                             value={newPlayer.number}
                                             onChange={(e) => setNewPlayer({ ...newPlayer, number: e.target.value })}
-                                            className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 focus:outline-none focus:border-red-500/50 transition-colors text-sm"
+                                            className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 focus:outline-none focus:border-brand/50 transition-colors text-sm"
                                         />
                                     </div>
                                     <div className="space-y-1.5">
@@ -473,7 +474,7 @@ export default function SquadPage() {
                                         <select
                                             value={newPlayer.position}
                                             onChange={(e) => setNewPlayer({ ...newPlayer, position: e.target.value })}
-                                            className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 focus:outline-none focus:border-red-500/50 transition-colors text-sm"
+                                            className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 focus:outline-none focus:border-brand/50 transition-colors text-sm"
                                         >
                                             <option>Torwart</option>
                                             <option>Abwehr</option>
@@ -489,7 +490,7 @@ export default function SquadPage() {
                                         <select
                                             value={newPlayer.status}
                                             onChange={(e) => setNewPlayer({ ...newPlayer, status: e.target.value as 'Active' | 'Injured' | 'Away' })}
-                                            className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 focus:outline-none focus:border-red-500/50 transition-colors text-sm"
+                                            className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 focus:outline-none focus:border-brand/50 transition-colors text-sm"
                                         >
                                             <option value="Active">Aktiv</option>
                                             <option value="Injured">Verletzt</option>
@@ -501,7 +502,7 @@ export default function SquadPage() {
                                         <select
                                             value={newPlayer.role}
                                             onChange={(e) => setNewPlayer({ ...newPlayer, role: e.target.value as 'Captain' | 'Regular' })}
-                                            className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 focus:outline-none focus:border-red-500/50 transition-colors text-sm"
+                                            className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 focus:outline-none focus:border-brand/50 transition-colors text-sm"
                                         >
                                             <option value="Regular">Normal</option>
                                             <option value="Captain">Kapitän</option>

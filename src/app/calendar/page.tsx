@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import { useCallback } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { cn } from "@/lib/utils";
 import { getEvents, createEvent, Event } from "@/lib/events";
 
@@ -81,7 +82,7 @@ export default function CalendarPage() {
     const getTypeStyles = (type: string) => {
         switch (type) {
             case "Training": return "bg-blue-500/10 text-blue-500 ring-blue-500/20";
-            case "Match": return "bg-red-500/10 text-red-500 ring-red-500/20";
+            case "Match": return "bg-brand/10 text-brand ring-brand/20";
             case "Event": return "bg-purple-500/10 text-purple-500 ring-purple-500/20";
             default: return "bg-slate-500/10 text-slate-500 ring-slate-500/20";
         }
@@ -96,6 +97,7 @@ export default function CalendarPage() {
                         <Link href="/" className="p-2 hover:bg-slate-800 rounded-full transition-colors">
                             <ArrowLeft className="w-5 h-5" />
                         </Link>
+                        <Image src="/logo.jpg" alt="Logo" width={100} height={25} className="h-6 w-auto object-contain rounded" />
                         <h1 className="text-2xl font-bold">Terminkalender</h1>
                     </div>
                     <div className="flex bg-slate-900 rounded-lg p-1 border border-slate-800">
@@ -105,7 +107,7 @@ export default function CalendarPage() {
                                 onClick={() => setTeam(t as "Both" | "1. Mannschaft" | "2. Mannschaft")}
                                 className={cn(
                                     "px-4 py-1.5 rounded-md text-sm font-medium transition-all",
-                                    team === t ? "bg-red-600 text-white shadow-lg" : "text-slate-400 hover:text-white"
+                                    team === t ? "bg-brand-dark text-white shadow-lg" : "text-slate-400 hover:text-white"
                                 )}
                             >
                                 {t === "Both" ? "Alle" : t}
@@ -119,12 +121,12 @@ export default function CalendarPage() {
                 {/* Actions Bar */}
                 <div className="flex items-center justify-between mb-10">
                     <h2 className="text-xl font-bold flex items-center gap-3">
-                        <CalendarIcon className="w-6 h-6 text-red-500" />
+                        <CalendarIcon className="w-6 h-6 text-brand" />
                         Anstehende Termine
                     </h2>
                     <button
                         onClick={() => setIsModalOpen(true)}
-                        className="flex items-center gap-2 bg-red-600 hover:bg-red-700 text-white px-6 py-2.5 rounded-xl font-medium transition-all active:scale-95 shadow-lg shadow-red-600/10"
+                        className="flex items-center gap-2 bg-brand hover:bg-brand-dark text-white px-6 py-2.5 rounded-xl font-medium transition-all active:scale-95 shadow-lg shadow-brand/10"
                     >
                         <Plus className="w-4 h-4" />
                         Neuer Termin
@@ -134,7 +136,7 @@ export default function CalendarPage() {
                 {/* Event List */}
                 {isLoading ? (
                     <div className="flex justify-center py-20">
-                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-red-500" />
+                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-brand" />
                     </div>
                 ) : (
                     <div className="space-y-6">

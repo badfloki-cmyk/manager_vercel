@@ -59,7 +59,7 @@ export default function TacticsPage() {
     // Drawing Logic
     const [paths, setPaths] = useState<Path[]>([]);
     const [currentPath, setCurrentPath] = useState<Path | null>(null);
-    const [drawColor, setDrawColor] = useState("#ef4444"); // red-500
+    const [drawColor, setDrawColor] = useState("#d4006d"); // KGS Pink
 
     const constraintsRef = useRef<HTMLDivElement>(null);
     const svgRef = useRef<SVGSVGElement>(null);
@@ -166,7 +166,7 @@ export default function TacticsPage() {
             number: player.number,
             x: 50,
             y: 50,
-            color: player.position === "Torwart" ? "bg-yellow-500" : "bg-red-600",
+            color: player.position === "Torwart" ? "bg-yellow-500" : "bg-brand",
             photoUrl: player.photoUrl
         };
         setPlayersOnPitch(prev => [...prev, newPlayer]);
@@ -199,7 +199,7 @@ export default function TacticsPage() {
                             <ArrowLeft className="w-5 h-5" />
                         </Link>
                         <h1 className="text-xl font-bold flex items-center gap-3">
-                            <LayoutDashboard className="w-5 h-5 text-red-500" />
+                            <LayoutDashboard className="w-5 h-5 text-brand" />
                             Taktik-Board
                         </h1>
                     </div>
@@ -210,7 +210,7 @@ export default function TacticsPage() {
                                 onClick={() => setMode("futsal")}
                                 className={cn(
                                     "px-3 py-1 rounded-md text-xs font-medium transition-all",
-                                    mode === "futsal" ? "bg-red-600 text-white" : "text-slate-400 hover:text-white"
+                                    mode === "futsal" ? "bg-brand-dark text-white" : "text-slate-400 hover:text-white"
                                 )}
                             >
                                 Futsal
@@ -219,7 +219,7 @@ export default function TacticsPage() {
                                 onClick={() => setMode("football")}
                                 className={cn(
                                     "px-3 py-1 rounded-md text-xs font-medium transition-all",
-                                    mode === "football" ? "bg-red-600 text-white" : "text-slate-400 hover:text-white"
+                                    mode === "football" ? "bg-brand-dark text-white" : "text-slate-400 hover:text-white"
                                 )}
                             >
                                 Fußball
@@ -236,7 +236,7 @@ export default function TacticsPage() {
 
                         <button
                             onClick={() => setShowSaveModal(true)}
-                            className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg text-xs font-bold transition-all flex items-center gap-2"
+                            className="px-4 py-2 bg-brand hover:bg-brand-dark text-white rounded-lg text-xs font-bold transition-all flex items-center gap-2"
                         >
                             <Save className="w-4 h-4" />
                             Speichern
@@ -266,7 +266,7 @@ export default function TacticsPage() {
                             <button
                                 key={player._id}
                                 onClick={() => addPlayerToPitch(player)}
-                                className="w-full group flex items-center justify-between p-2.5 bg-slate-900/40 border border-slate-800 rounded-xl hover:bg-slate-800/60 hover:border-red-500/30 transition-all text-left"
+                                className="w-full group flex items-center justify-between p-2.5 bg-slate-900/40 border border-slate-800 rounded-xl hover:bg-slate-800/60 hover:border-brand/30 transition-all text-left"
                             >
                                 <div className="flex items-center gap-3">
                                     <div className={cn(
@@ -295,7 +295,7 @@ export default function TacticsPage() {
                             onClick={() => setIsDrawMode(false)}
                             className={cn(
                                 "p-2.5 rounded-xl transition-all",
-                                !isDrawMode ? "bg-red-600 text-white shadow-lg" : "text-slate-400 hover:bg-slate-800"
+                                !isDrawMode ? "bg-brand text-white shadow-lg" : "text-slate-400 hover:bg-slate-800"
                             )}
                             title="Bewegen"
                         >
@@ -305,7 +305,7 @@ export default function TacticsPage() {
                             onClick={() => setIsDrawMode(true)}
                             className={cn(
                                 "p-2.5 rounded-xl transition-all",
-                                isDrawMode ? "bg-red-600 text-white shadow-lg" : "text-slate-400 hover:bg-slate-800"
+                                isDrawMode ? "bg-brand text-white shadow-lg" : "text-slate-400 hover:bg-slate-800"
                             )}
                             title="Zeichnen"
                         >
@@ -541,7 +541,7 @@ export default function TacticsPage() {
                                     <button
                                         disabled={isSaving || !tacticName}
                                         onClick={handleSaveTactic}
-                                        className="flex-1 bg-red-600 hover:bg-red-700 disabled:opacity-50 text-white py-3 rounded-xl font-bold transition-all flex items-center justify-center gap-2"
+                                        className="flex-1 bg-brand hover:bg-brand-dark disabled:opacity-50 text-white py-3 rounded-xl font-bold transition-all flex items-center justify-center gap-2"
                                     >
                                         {isSaving ? "Speichert..." : <><Check className="w-4 h-4" /> Speichern</>}
                                     </button>
@@ -586,7 +586,7 @@ export default function TacticsPage() {
                                         <div
                                             key={t._id}
                                             onClick={() => loadTactic(t)}
-                                            className="group flex items-center justify-between p-4 bg-slate-950/50 border border-slate-800 rounded-2xl hover:bg-slate-800/30 hover:border-red-500/30 cursor-pointer transition-all"
+                                            className="group flex items-center justify-between p-4 bg-slate-950/50 border border-slate-800 rounded-2xl hover:bg-slate-800/30 hover:border-brand/30 cursor-pointer transition-all"
                                         >
                                             <div className="flex items-center gap-4">
                                                 <div className={cn(
@@ -605,7 +605,7 @@ export default function TacticsPage() {
                                             <div className="flex items-center gap-2">
                                                 <button
                                                     onClick={(e) => deleteSavedTactic(t._id!, e)}
-                                                    className="p-2 hover:bg-red-500/10 hover:text-red-500 rounded-lg transition-all opacity-0 group-hover:opacity-100"
+                                                    className="p-2 hover:bg-brand/10 hover:text-brand rounded-lg transition-all opacity-0 group-hover:opacity-100"
                                                 >
                                                     <Trash2 className="w-4 h-4" />
                                                 </button>

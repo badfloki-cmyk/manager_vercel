@@ -23,42 +23,42 @@ const features = [
     description: "Spielerprofile, Staff und Rollen für 1. & 2. Mannschaft.",
     icon: Users,
     href: "/squad",
-    color: "bg-red-500/10 text-red-500",
+    color: "bg-brand/10 text-brand",
   },
   {
     title: "Kalender & Events",
     description: "Trainingstermine, Spieltage und Team-Events im Überblick.",
     icon: CalendarIcon,
     href: "/calendar",
-    color: "bg-red-500/10 text-red-500",
+    color: "bg-brand/10 text-brand",
   },
   {
     title: "Taktik-Board",
     description: "Digitale Aufstellungen und Spielzüge per Drag & Drop.",
     icon: LayoutDashboard,
     href: "/tactics",
-    color: "bg-red-500/10 text-red-500",
+    color: "bg-brand/10 text-brand",
   },
   {
     title: "Statistiken",
     description: "Leistungsanalyse und Leaderboards für das gesamte Team.",
     icon: Trophy,
     href: "/stats",
-    color: "bg-red-500/10 text-red-500",
+    color: "bg-brand/10 text-brand",
   },
   {
     title: "Kommunikation",
     description: "Interne Nachrichten und Datei-Austausch für alle Teams.",
     icon: MessageSquare,
     href: "/messages",
-    color: "bg-red-500/10 text-red-500",
+    color: "bg-brand/10 text-brand",
   },
   {
     title: "Einstellungen",
     description: "Club-Konfiguration und Berechtigungen verwalten.",
     icon: Settings,
     href: "/settings",
-    color: "bg-red-500/10 text-red-500",
+    color: "bg-brand/10 text-brand",
   },
 ];
 
@@ -85,7 +85,7 @@ export default function Home() {
     <div className="min-h-screen bg-[#020617] text-white">
       {/* Hero Section */}
       <div className="relative overflow-hidden pt-24 pb-16 lg:pt-32">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_-20%,rgba(227,6,19,0.15),transparent)] pointer-events-none" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_-20%,rgba(212,0,109,0.15),transparent)] pointer-events-none" />
 
         <div className="mx-auto max-w-7xl px-6 lg:px-8 relative">
           <motion.div
@@ -96,16 +96,16 @@ export default function Home() {
           >
             <div className="flex justify-center mb-12">
               <Image
-                src="https://erspattensen.de/wp-content/uploads/2023/02/ERS-1024x208.jpg"
+                src="/logo.jpg"
                 alt="ERS Pattensen Logo"
                 width={400}
                 height={80}
-                className="h-24 w-auto object-contain brightness-0 invert"
+                className="h-24 w-auto object-contain rounded-xl"
                 priority
               />
             </div>
 
-            <div className="inline-flex items-center rounded-full px-3 py-1 text-sm font-medium bg-red-500/10 text-red-400 ring-1 ring-inset ring-red-500/20 mb-8">
+            <div className="inline-flex items-center rounded-full px-3 py-1 text-sm font-medium bg-brand/10 text-brand ring-1 ring-inset ring-brand/20 mb-8">
               Club Manager Beta
             </div>
             <h1 className="text-4xl font-bold tracking-tight sm:text-6xl bg-clip-text text-transparent bg-gradient-to-b from-white to-slate-400">
@@ -118,17 +118,17 @@ export default function Home() {
 
             <div className="mt-10 flex items-center justify-center gap-x-6">
               <div className="flex flex-col items-center">
-                <span className="text-3xl font-bold text-red-500">{stats.players}</span>
+                <span className="text-3xl font-bold text-brand">{stats.players}</span>
                 <span className="text-xs text-slate-500 uppercase font-bold tracking-widest">Spieler</span>
               </div>
               <div className="w-px h-10 bg-slate-800" />
               <div className="flex flex-col items-center">
-                <span className="text-3xl font-bold text-red-500">{stats.events}</span>
+                <span className="text-3xl font-bold text-brand">{stats.events}</span>
                 <span className="text-xs text-slate-500 uppercase font-bold tracking-widest">Termine</span>
               </div>
               <div className="w-px h-10 bg-slate-800" />
               <div className="flex flex-col items-center">
-                <span className="text-3xl font-bold text-red-500">2</span>
+                <span className="text-3xl font-bold text-brand">2</span>
                 <span className="text-xs text-slate-500 uppercase font-bold tracking-widest">Teams</span>
               </div>
             </div>

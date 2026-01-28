@@ -39,11 +39,11 @@ export default function StatsPage() {
         loadPlayers();
     }, [loadPlayers]);
 
-    const filteredPlayers = team === "all" 
-        ? players 
+    const filteredPlayers = team === "all"
+        ? players
         : players.filter(p => p.team === team);
 
-    const sortedPlayers = [...filteredPlayers].sort((a, b) => 
+    const sortedPlayers = [...filteredPlayers].sort((a, b) =>
         b.stats[category] - a.stats[category]
     );
 
@@ -55,7 +55,7 @@ export default function StatsPage() {
         "2. Mannschaft": players.filter(p => p.team === "2. Mannschaft"),
     };
 
-    const getTeamTotal = (teamPlayers: Player[], stat: StatCategory) => 
+    const getTeamTotal = (teamPlayers: Player[], stat: StatCategory) =>
         teamPlayers.reduce((sum, p) => sum + p.stats[stat], 0);
 
     const categoryLabels: Record<StatCategory, string> = {
@@ -79,8 +79,9 @@ export default function StatsPage() {
                         <Link href="/" className="p-2 hover:bg-slate-800 rounded-full transition-colors">
                             <ArrowLeft className="w-5 h-5" />
                         </Link>
+                        <Image src="/logo.jpg" alt="Logo" width={100} height={25} className="h-6 w-auto object-contain rounded" />
                         <h1 className="text-2xl font-bold flex items-center gap-3">
-                            <Trophy className="w-6 h-6 text-red-500" />
+                            <Trophy className="w-6 h-6 text-brand" />
                             Statistiken
                         </h1>
                     </div>
@@ -91,7 +92,7 @@ export default function StatsPage() {
                                 onClick={() => setTeam(t as typeof team)}
                                 className={cn(
                                     "px-4 py-1.5 rounded-md text-sm font-medium transition-all",
-                                    team === t ? "bg-red-600 text-white shadow-lg" : "text-slate-400 hover:text-white"
+                                    team === t ? "bg-brand-dark text-white shadow-lg" : "text-slate-400 hover:text-white"
                                 )}
                             >
                                 {t === "all" ? "Alle" : t}
@@ -112,8 +113,8 @@ export default function StatsPage() {
                                 onClick={() => setCategory(cat)}
                                 className={cn(
                                     "flex items-center gap-2 px-6 py-3 rounded-xl font-medium transition-all",
-                                    category === cat 
-                                        ? "bg-red-600 text-white shadow-lg shadow-red-600/20" 
+                                    category === cat
+                                        ? "bg-brand-dark text-white shadow-lg shadow-brand/20"
                                         : "bg-slate-900 border border-slate-800 text-slate-400 hover:text-white hover:border-slate-700"
                                 )}
                             >
@@ -126,7 +127,7 @@ export default function StatsPage() {
 
                 {isLoading ? (
                     <div className="flex justify-center py-20">
-                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-red-500" />
+                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-brand" />
                     </div>
                 ) : (
                     <>
@@ -135,11 +136,11 @@ export default function StatsPage() {
                             {[1, 0, 2].map((idx) => {
                                 const player = topThree[idx];
                                 if (!player) return <div key={idx} />;
-                                
+
                                 const position = idx === 0 ? 2 : idx === 1 ? 1 : 3;
                                 const heights = { 1: "h-48", 2: "h-40", 3: "h-32" };
                                 const medals = { 1: "🥇", 2: "🥈", 3: "🥉" };
-                                
+
                                 return (
                                     <motion.div
                                         key={player._id}
@@ -175,8 +176,8 @@ export default function StatsPage() {
                                         <div className={cn(
                                             "mt-4 w-full rounded-t-2xl flex items-end justify-center pb-4",
                                             position === 1 ? "bg-gradient-to-t from-yellow-500/20 to-transparent" :
-                                            position === 2 ? "bg-gradient-to-t from-slate-500/20 to-transparent" :
-                                            "bg-gradient-to-t from-amber-700/20 to-transparent",
+                                                position === 2 ? "bg-gradient-to-t from-slate-500/20 to-transparent" :
+                                                    "bg-gradient-to-t from-amber-700/20 to-transparent",
                                             heights[position as 1 | 2 | 3]
                                         )}>
                                             <span className="text-4xl font-black">{player.stats[category]}</span>
@@ -190,7 +191,7 @@ export default function StatsPage() {
                         <div className="bg-slate-900/50 border border-slate-800 rounded-2xl overflow-hidden mb-12">
                             <div className="p-4 border-b border-slate-800">
                                 <h3 className="font-bold flex items-center gap-2">
-                                    <Medal className="w-5 h-5 text-red-500" />
+                                    <Medal className="w-5 h-5 text-brand" />
                                     Leaderboard - {categoryLabels[category]}
                                 </h3>
                             </div>
@@ -243,19 +244,19 @@ export default function StatsPage() {
                                     <h4 className="font-bold text-lg mb-4">{teamName}</h4>
                                     <div className="grid grid-cols-3 gap-4">
                                         <div className="text-center">
-                                            <p className="text-3xl font-black text-red-500">
+                                            <p className="text-3xl font-black text-brand">
                                                 {getTeamTotal(teamStats[teamName], "goals")}
                                             </p>
                                             <p className="text-xs text-slate-500 uppercase font-bold">Tore</p>
                                         </div>
                                         <div className="text-center">
-                                            <p className="text-3xl font-black text-red-500">
+                                            <p className="text-3xl font-black text-brand">
                                                 {getTeamTotal(teamStats[teamName], "assists")}
                                             </p>
                                             <p className="text-xs text-slate-500 uppercase font-bold">Assists</p>
                                         </div>
                                         <div className="text-center">
-                                            <p className="text-3xl font-black text-red-500">
+                                            <p className="text-3xl font-black text-brand">
                                                 {teamStats[teamName].length}
                                             </p>
                                             <p className="text-xs text-slate-500 uppercase font-bold">Spieler</p>
