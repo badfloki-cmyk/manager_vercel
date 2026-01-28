@@ -1,9 +1,10 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import {
   Users,
-  Calendar,
+  Calendar as CalendarIcon,
   Trophy,
   LayoutDashboard,
   MessageSquare,
@@ -11,6 +12,8 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
+import { getPlayers } from "@/lib/squad";
+import { getEvents } from "@/lib/events";
 
 const features = [
   {
@@ -23,7 +26,7 @@ const features = [
   {
     title: "Kalender & Events",
     description: "Trainingstermine, Spieltage und Team-Events im Überblick.",
-    icon: Calendar,
+    icon: CalendarIcon,
     href: "/calendar",
     color: "bg-red-500/10 text-red-500",
   },
@@ -58,6 +61,24 @@ const features = [
 ];
 
 export default function Home() {
+  const [stats, setStats] = useState({ players: 0, events: 0 });
+
+  useEffect(() => {
+    const loadStats = async () => {
+      try {
+        const { players } = await getPlayers();
+        const { events } = await getEvents();
+        setStats({
+          players: players?.length || 0,
+          events: events?.length || 0
+        });
+      } catch (error) {
+        console.error("Dashboard load error:", error);
+      }
+    };
+    loadStats();
+  }, []);
+
   return (
     <div className="min-h-screen bg-[#020617] text-white">
       {/* Hero Section */}
@@ -89,6 +110,23 @@ export default function Home() {
               Verwalte deine 1. und 2. Mannschaft der ERS Pattensen mit einem professionellen System für Kader,
               Taktik und Performance-Analyse.
             </p>
+
+            <div className="mt-10 flex items-center justify-center gap-x-6">
+              <div className="flex flex-col items-center">
+                <span className="text-3xl font-bold text-red-500">{stats.players}</span>
+                <span className="text-xs text-slate-500 uppercase font-bold tracking-widest">Spieler</span>
+              </div>
+              <div className="w-px h-10 bg-slate-800" />
+              <div className="flex flex-col items-center">
+                <span className="text-3xl font-bold text-red-500">{stats.events}</span>
+                <span className="text-xs text-slate-500 uppercase font-bold tracking-widest">Termine</span>
+              </div>
+              <div className="w-px h-10 bg-slate-800" />
+              <div className="flex flex-col items-center">
+                <span className="text-3xl font-bold text-red-500">2</span>
+                <span className="text-xs text-slate-500 uppercase font-bold tracking-widest">Teams</span>
+              </div>
+            </div>
           </motion.div>
 
           {/* Grid */}
