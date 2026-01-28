@@ -12,7 +12,6 @@ interface MongooseCached {
 }
 
 declare global {
-    // eslint-disable-next-line no-var
     var mongoose: MongooseCached | undefined;
 }
 

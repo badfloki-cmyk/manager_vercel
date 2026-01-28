@@ -8,7 +8,6 @@ import {
     Send,
     Bell,
     Users,
-    Calendar,
     Pin
 } from "lucide-react";
 import Link from "next/link";

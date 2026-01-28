@@ -8,8 +8,7 @@ import {
     RotateCcw,
     LayoutDashboard,
     Users,
-    Plus,
-    Minus
+    Plus
 } from "lucide-react";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
