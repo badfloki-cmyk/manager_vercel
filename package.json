@@ -1,7 +1,7 @@
 {
   "name": "club-manager",
-  "version": "1.1.1",
-  "comment": "Critical Security Patch - Next.js v15.2.0 Upgrade",
+  "version": "2.0.0",
+  "comment": "Major Architectural Shift - Full Stack Independence",
   "private": true,
   "scripts": {
     "dev": "next dev",
@@ -15,6 +15,7 @@
     "react": "19.0.0",
     "react-dom": "19.0.0",
     "axios": "^1.7.9",
+    "mongoose": "^8.9.5",
     "framer-motion": "^11.18.1",
     "lucide-react": "^0.474.0",
     "clsx": "^2.1.1",
