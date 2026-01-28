@@ -14,8 +14,6 @@ import {
     Footprints,
     Plus,
     Trash2,
-    Save,
-    MapPin,
     Shirt,
     User
 } from "lucide-react";
