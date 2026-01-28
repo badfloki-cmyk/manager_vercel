@@ -19,6 +19,7 @@ import React from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { cn } from "@/lib/utils";
+import { useSession } from "next-auth/react";
 import { getPlayers, createPlayer, deletePlayer, updatePlayer, Player } from "@/lib/squad";
 
 export default function SquadPage() {
@@ -142,6 +143,9 @@ export default function SquadPage() {
         }
     };
 
+    const { data: session } = useSession();
+    const isAdmin = (session?.user as any)?.role === "admin";
+
     const filteredPlayers = players.filter(p =>
         `${p.firstName} ${p.lastName}`.toLowerCase().includes(searchTerm.toLowerCase()) ||
         p.position.toLowerCase().includes(searchTerm.toLowerCase())
@@ -216,30 +220,32 @@ export default function SquadPage() {
             </div>
 
             {/* Action Buttons */}
-            <div className="absolute top-4 right-4 flex gap-1 opacity-0 group-hover:opacity-100 transition-all">
-                <button
-                    onClick={() => toggleBench(player)}
-                    className={cn(
-                        "p-2 rounded-xl transition-all shadow-sm border border-slate-100 bg-white",
-                        player.onBench
-                            ? "hover:bg-emerald-50 hover:text-emerald-600"
-                            : "hover:bg-orange-50 hover:text-orange-600"
-                    )}
-                    title={player.onBench ? "Auf Feld setzen" : "Auf Bank setzen"}
-                >
-                    {player.onBench ? (
-                        <ArrowUpFromLine className="w-4 h-4" />
-                    ) : (
-                        <ArrowDownToLine className="w-4 h-4" />
-                    )}
-                </button>
-                <button
-                    onClick={() => handleDeletePlayer(player._id)}
-                    className="p-2 bg-white border border-slate-100 shadow-sm hover:bg-brand hover:text-white rounded-xl transition-all"
-                >
-                    <Trash2 className="w-4 h-4" />
-                </button>
-            </div>
+            {isAdmin && (
+                <div className="absolute top-4 right-4 flex gap-1 opacity-0 group-hover:opacity-100 transition-all">
+                    <button
+                        onClick={() => toggleBench(player)}
+                        className={cn(
+                            "p-2 rounded-xl transition-all shadow-sm border border-slate-100 bg-white",
+                            player.onBench
+                                ? "hover:bg-emerald-50 hover:text-emerald-600"
+                                : "hover:bg-orange-50 hover:text-orange-600"
+                        )}
+                        title={player.onBench ? "Auf Feld setzen" : "Auf Bank setzen"}
+                    >
+                        {player.onBench ? (
+                            <ArrowUpFromLine className="w-4 h-4" />
+                        ) : (
+                            <ArrowDownToLine className="w-4 h-4" />
+                        )}
+                    </button>
+                    <button
+                        onClick={() => handleDeletePlayer(player._id)}
+                        className="p-2 bg-white border border-slate-100 shadow-sm hover:bg-brand hover:text-white rounded-xl transition-all"
+                    >
+                        <Trash2 className="w-4 h-4" />
+                    </button>
+                </div>
+            )}
         </motion.div>
     );
 
@@ -291,13 +297,15 @@ export default function SquadPage() {
                             className="w-full bg-slate-50 border border-slate-100 rounded-2xl py-3 pl-12 pr-6 text-sm focus:outline-none focus:border-brand/30 focus:bg-white transition-all shadow-inner font-medium"
                         />
                     </div>
-                    <button
-                        onClick={() => setIsModalOpen(true)}
-                        className="w-full md:w-auto flex items-center justify-center gap-2 bg-brand hover:bg-brand-dark text-white px-8 py-3.5 rounded-2xl font-black uppercase text-xs tracking-[0.1em] transition-all active:scale-95 shadow-xl shadow-brand/20"
-                    >
-                        <UserPlus className="w-4 h-4" />
-                        Neuer Spieler
-                    </button>
+                    {isAdmin && (
+                        <button
+                            onClick={() => setIsModalOpen(true)}
+                            className="w-full md:w-auto flex items-center justify-center gap-2 bg-brand hover:bg-brand-dark text-white px-8 py-3.5 rounded-2xl font-black uppercase text-xs tracking-[0.1em] transition-all active:scale-95 shadow-xl shadow-brand/20"
+                        >
+                            <UserPlus className="w-4 h-4" />
+                            Neuer Spieler
+                        </button>
+                    )}
                 </div>
 
                 {/* Stats Summary */}

@@ -1,77 +1,83 @@
-"use client";
-
-import { useState } from "react";
-import { motion } from "framer-motion";
+import { useState, useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import {
     MessageSquare,
     ArrowLeft,
     Send,
     Bell,
     Users,
-    Pin
+    Pin,
+    Loader2,
+    Lock
 } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
 import { cn } from "@/lib/utils";
+import { useSession } from "next-auth/react";
 
 interface Message {
-    id: string;
+    _id: string;
     author: string;
     content: string;
-    timestamp: string;
+    createdAt: string;
     type: "announcement" | "general";
     pinned?: boolean;
     team?: "1. Mannschaft" | "2. Mannschaft" | "Alle";
 }
 
-const DEMO_MESSAGES: Message[] = [
-    {
-        id: "1",
-        author: "Trainer Schmidt",
-        content: "Training am Donnerstag fällt wegen Platzsperrung aus! Ersatztermin folgt.",
-        timestamp: "2026-01-28T10:30:00",
-        type: "announcement",
-        pinned: true,
-        team: "Alle"
-    },
-    {
-        id: "2",
-        author: "Mannschaftsrat",
-        content: "Erinnerung: Trikotgeld bitte bis Ende Januar überweisen.",
-        timestamp: "2026-01-27T18:00:00",
-        type: "announcement",
-        team: "1. Mannschaft"
-    },
-    {
-        id: "3",
-        author: "Co-Trainer Müller",
-        content: "Wer kann am Samstag beim Auswärtsspiel fahren? Bitte melden!",
-        timestamp: "2026-01-26T14:15:00",
-        type: "general",
-        team: "2. Mannschaft"
-    },
-    {
-        id: "4",
-        author: "Vorstand",
-        content: "Jahreshauptversammlung am 15.02. um 19:00 Uhr im Vereinsheim.",
-        timestamp: "2026-01-25T09:00:00",
-        type: "announcement",
-        team: "Alle"
-    },
-    {
-        id: "5",
-        author: "Zeugwart Weber",
-        content: "Neue Trainingsshirts sind da! Können ab morgen abgeholt werden.",
-        timestamp: "2026-01-24T16:45:00",
-        type: "general",
-        team: "Alle"
-    }
-];
-
 export default function MessagesPage() {
-    const [messages] = useState<Message[]>(DEMO_MESSAGES);
+    const { data: session } = useSession();
+    const isAdmin = (session?.user as any)?.role === "admin";
+
+    const [messages, setMessages] = useState<Message[]>([]);
+    const [isLoading, setIsLoading] = useState(true);
     const [filter, setFilter] = useState<"all" | "announcements">("all");
     const [newMessage, setNewMessage] = useState("");
+    const [messageType, setMessageType] = useState<"general" | "announcement">("general");
+    const [messageTeam, setMessageTeam] = useState<"Alle" | "1. Mannschaft" | "2. Mannschaft">("Alle");
+    const [isSending, setIsSending] = useState(false);
+
+    const fetchMessages = async () => {
+        try {
+            const res = await fetch("/api/messages");
+            const data = await res.json();
+            setMessages(data.messages || []);
+        } catch (err) {
+            console.error("Fetch error:", err);
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        fetchMessages();
+    }, []);
+
+    const handleSendMessage = async () => {
+        if (!newMessage || isSending) return;
+        setIsSending(true);
+        try {
+            const res = await fetch("/api/messages", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    content: newMessage,
+                    type: messageType,
+                    team: messageTeam,
+                    pinned: messageType === "announcement"
+                }),
+            });
+
+            if (res.ok) {
+                setNewMessage("");
+                fetchMessages();
+            }
+        } catch (err) {
+            console.error("Send error:", err);
+        } finally {
+            setIsSending(false);
+        }
+    };
 
     const filteredMessages = filter === "all"
         ? messages
@@ -147,72 +153,114 @@ export default function MessagesPage() {
                 </div>
 
                 {/* Messages List */}
-                <div className="space-y-6 mb-12">
-                    {filteredMessages.map((message, index) => (
-                        <motion.div
-                            key={message.id}
-                            initial={{ opacity: 0, y: 20 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ delay: index * 0.05 }}
-                            className={cn(
-                                "bg-white border rounded-[2rem] p-8 transition-all hover:shadow-2xl hover:shadow-brand/5 hover:border-brand/20 shadow-xl shadow-slate-200/50",
-                                message.pinned ? "border-brand/30 bg-brand/5" : "border-slate-100"
-                            )}
-                        >
-                            <div className="flex items-start justify-between mb-4">
-                                <div className="flex items-center gap-4">
-                                    <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-brand to-brand-dark flex items-center justify-center text-sm font-black text-white shadow-lg shadow-brand/20">
-                                        {message.author.split(' ').map(n => n[0]).join('')}
+                <div className="space-y-6 mb-12 min-h-[300px]">
+                    {isLoading ? (
+                        <div className="flex flex-col items-center justify-center py-20 text-slate-400">
+                            <Loader2 className="w-8 h-8 animate-spin mb-4" />
+                            <p className="text-[10px] font-black uppercase tracking-widest">Laden...</p>
+                        </div>
+                    ) : filteredMessages.length === 0 ? (
+                        <div className="text-center py-20 bg-slate-50 rounded-[3rem] border border-dashed border-slate-200">
+                            <MessageSquare className="w-12 h-12 text-slate-200 mx-auto mb-4" />
+                            <p className="text-slate-400 font-bold uppercase text-[10px] tracking-widest">Keine Nachrichten vorhanden</p>
+                        </div>
+                    ) : (
+                        <AnimatePresence mode="popLayout">
+                            {filteredMessages.map((message, index) => (
+                                <motion.div
+                                    key={message._id}
+                                    initial={{ opacity: 0, y: 20 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    transition={{ delay: index * 0.05 }}
+                                    className={cn(
+                                        "bg-white border rounded-[2rem] p-8 transition-all hover:shadow-2xl hover:shadow-brand/5 hover:border-brand/20 shadow-xl shadow-slate-200/50",
+                                        message.pinned ? "border-brand/30 bg-brand/5" : "border-slate-100"
+                                    )}
+                                >
+                                    <div className="flex items-start justify-between mb-4">
+                                        <div className="flex items-center gap-4">
+                                            <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-brand to-brand-dark flex items-center justify-center text-sm font-black text-white shadow-lg shadow-brand/20">
+                                                {message.author.split(' ').map(n => n[0]).join('')}
+                                            </div>
+                                            <div>
+                                                <p className="font-black text-slate-900 text-lg tracking-tight">{message.author}</p>
+                                                <p className="text-[10px] text-slate-400 font-black uppercase tracking-widest leading-none mt-1">{formatTime(message.createdAt)}</p>
+                                            </div>
+                                        </div>
+                                        <div className="flex items-center gap-2">
+                                            {message.pinned && (
+                                                <Pin className="w-4 h-4 text-brand" />
+                                            )}
+                                            {message.type === "announcement" && (
+                                                <span className="px-3 py-1 bg-brand/10 text-brand text-[10px] font-black uppercase tracking-widest rounded-lg ring-1 ring-inset ring-brand/20">
+                                                    Wichtig
+                                                </span>
+                                            )}
+                                            {message.team && (
+                                                <span className="px-3 py-1 bg-slate-50 text-slate-400 text-[10px] font-black uppercase tracking-widest rounded-lg flex items-center gap-1.5 border border-slate-100">
+                                                    <Users className="w-3.5 h-3.5" />
+                                                    {message.team}
+                                                </span>
+                                            )}
+                                        </div>
                                     </div>
-                                    <div>
-                                        <p className="font-black text-slate-900 text-lg tracking-tight">{message.author}</p>
-                                        <p className="text-[10px] text-slate-400 font-black uppercase tracking-widest leading-none mt-1">{formatTime(message.timestamp)}</p>
-                                    </div>
-                                </div>
-                                <div className="flex items-center gap-2">
-                                    {message.pinned && (
-                                        <Pin className="w-4 h-4 text-brand" />
-                                    )}
-                                    {message.type === "announcement" && (
-                                        <span className="px-3 py-1 bg-brand/10 text-brand text-[10px] font-black uppercase tracking-widest rounded-lg ring-1 ring-inset ring-brand/20">
-                                            Wichtig
-                                        </span>
-                                    )}
-                                    {message.team && (
-                                        <span className="px-3 py-1 bg-slate-50 text-slate-400 text-[10px] font-black uppercase tracking-widest rounded-lg flex items-center gap-1.5 border border-slate-100">
-                                            <Users className="w-3.5 h-3.5" />
-                                            {message.team}
-                                        </span>
-                                    )}
-                                </div>
-                            </div>
-                            <p className="text-slate-600 leading-relaxed font-medium">{message.content}</p>
-                        </motion.div>
-                    ))}
+                                    <p className="text-slate-600 leading-relaxed font-medium">{message.content}</p>
+                                </motion.div>
+                            ))}
+                        </AnimatePresence>
+                    )}
                 </div>
 
-                {/* Compose Box (Demo) */}
-                <div className="bg-white border border-slate-100 rounded-[2.5rem] p-10 shadow-2xl shadow-slate-200/50 relative">
-                    <div className="flex gap-6">
-                        <input
-                            type="text"
-                            value={newMessage}
-                            onChange={(e) => setNewMessage(e.target.value)}
-                            placeholder="Nachricht schreiben..."
-                            className="flex-1 bg-slate-50 border border-slate-100 rounded-2xl px-6 py-4 text-sm focus:outline-none focus:border-brand/30 focus:bg-white transition-all font-medium shadow-inner placeholder:text-slate-300"
-                        />
-                        <button
-                            className="px-10 py-4 bg-brand hover:bg-brand-dark text-white rounded-2xl font-black uppercase text-xs tracking-widest transition-all active:scale-95 flex items-center gap-3 shadow-xl shadow-brand/20"
-                            onClick={() => alert("Demo-Modus: Nachrichten werden nicht gespeichert.")}
-                        >
-                            <Send className="w-4 h-4" />
-                            Senden
-                        </button>
+                {/* Compose Box */}
+                {isAdmin ? (
+                    <div className="bg-white border border-slate-100 rounded-[2.5rem] p-10 shadow-2xl shadow-slate-200/50 relative">
+                        <div className="space-y-6">
+                            <div className="flex gap-4 mb-4">
+                                <select
+                                    value={messageType}
+                                    onChange={(e) => setMessageType(e.target.value as any)}
+                                    className="bg-slate-50 border border-slate-100 rounded-xl px-4 py-2 text-[10px] font-black uppercase tracking-widest"
+                                >
+                                    <option value="general">Allgemein</option>
+                                    <option value="announcement">Wichtig (Pin)</option>
+                                </select>
+                                <select
+                                    value={messageTeam}
+                                    onChange={(e) => setMessageTeam(e.target.value as any)}
+                                    className="bg-slate-50 border border-slate-100 rounded-xl px-4 py-2 text-[10px] font-black uppercase tracking-widest"
+                                >
+                                    <option value="Alle">Alle Teams</option>
+                                    <option value="1. Mannschaft">1. Mannschaft</option>
+                                    <option value="2. Mannschaft">2. Mannschaft</option>
+                                </select>
+                            </div>
+                            <div className="flex gap-6">
+                                <textarea
+                                    value={newMessage}
+                                    onChange={(e) => setNewMessage(e.target.value)}
+                                    placeholder="Nachricht schreiben..."
+                                    rows={1}
+                                    className="flex-1 bg-slate-50 border border-slate-100 rounded-2xl px-6 py-4 text-sm focus:outline-none focus:border-brand/30 focus:bg-white transition-all font-medium shadow-inner placeholder:text-slate-300 resize-none min-h-[56px]"
+                                />
+                                <button
+                                    className="px-10 py-4 bg-brand hover:bg-brand-dark text-white rounded-2xl font-black uppercase text-xs tracking-widest transition-all active:scale-95 flex items-center gap-3 shadow-xl shadow-brand/20 disabled:opacity-50"
+                                    onClick={handleSendMessage}
+                                    disabled={!newMessage || isSending}
+                                >
+                                    {isSending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
+                                    Senden
+                                </button>
+                            </div>
+                        </div>
                     </div>
-                    <p className="text-[10px] text-slate-400 mt-6 text-center font-black uppercase tracking-widest">
-                        ℹ️ Dies ist eine Demo-Ansicht. Vollständige Messaging-Funktionen in Entwicklung.
-                    </p>
-                </div>
+                ) : (
+                    <div className="bg-slate-50 border border-slate-100 border-dashed rounded-[2.5rem] p-10 text-center">
+                        <Lock className="w-8 h-8 text-slate-200 mx-auto mb-4" />
+                        <p className="text-[10px] text-slate-400 font-black uppercase tracking-widest">
+                            Nur Admins können Nachrichten verfassen.
+                        </p>
+                    </div>
+                )}
             </main>
         </div>
     );

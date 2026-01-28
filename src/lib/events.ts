@@ -27,6 +27,16 @@ export const createEvent = async (data: Partial<Event>) => {
     return response.data;
 };
 
+export const updateEvent = async (id: string, data: Partial<Event>) => {
+    const response = await api.patch(`/events/${id}`, data);
+    return response.data;
+};
+
+export const deleteEvent = async (id: string) => {
+    const response = await api.delete(`/events/${id}`);
+    return response.data;
+};
+
 export const updateAttendance = async (eventId: string, playerId: string, status: string) => {
     const response = await api.post(`/events/${eventId}/attendance`, { playerId, status });
     return response.data;

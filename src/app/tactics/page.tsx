@@ -15,7 +15,10 @@ import {
     X,
     Check,
     ChevronRight,
-    Search
+    Search,
+    Pin,
+    Loader2,
+    Lock
 } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
@@ -457,13 +460,15 @@ export default function TacticsPage() {
 
                                     {/* Delete indicator */}
                                     <button
+                                        onPointerDown={(e) => e.stopPropagation()}
                                         onClick={(e) => {
+                                            e.preventDefault();
                                             e.stopPropagation();
                                             removePlayerFromPitch(player.id);
                                         }}
-                                        className="absolute -top-2 -right-2 w-6 h-6 bg-brand border-2 border-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity z-50 shadow-lg hover:scale-110 active:scale-95"
+                                        className="absolute -top-3 -right-3 w-8 h-8 bg-brand border-2 border-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity z-[100] shadow-xl hover:scale-110 active:scale-95"
                                     >
-                                        <X className="w-3.5 h-3.5 text-white" />
+                                        <X className="w-4 h-4 text-white" />
                                     </button>
                                 </motion.div>
                             ))}

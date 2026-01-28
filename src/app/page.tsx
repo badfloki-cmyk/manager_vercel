@@ -54,7 +54,13 @@ const features = [
   },
 ];
 
+import { useSession, signOut } from "next-auth/react";
+import { LogOut } from "lucide-react";
+
 export default function Home() {
+  const { data: session } = useSession();
+  const isAdmin = (session?.user as any)?.role === "admin";
+
   const [stats, setStats] = useState({ players: 0, events: 0 });
 
   useEffect(() => {
@@ -73,8 +79,25 @@ export default function Home() {
     loadStats();
   }, []);
 
+  // Filter features based on role
+  const filteredFeatures = features.filter(f => {
+    if (f.title === "Einstellungen") return isAdmin;
+    return true;
+  });
+
   return (
     <div className="min-h-screen bg-white text-slate-900">
+      {/* Top Navigation / Logout */}
+      <div className="absolute top-8 right-8 z-10">
+        <button
+          onClick={() => signOut()}
+          className="flex items-center gap-2 px-6 py-3 bg-white border border-slate-100 rounded-2xl text-[10px] font-black uppercase tracking-widest text-slate-400 hover:text-brand hover:border-brand/20 hover:shadow-xl hover:shadow-brand/5 transition-all active:scale-95 shadow-sm"
+        >
+          <LogOut className="w-4 h-4" />
+          Abmelden
+        </button>
+      </div>
+
       {/* Hero Section */}
       <div className="relative overflow-hidden pt-24 pb-16 lg:pt-32">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_-20%,rgba(212,0,109,0.08),transparent)] pointer-events-none" />
@@ -98,14 +121,14 @@ export default function Home() {
             </div>
 
             <div className="inline-flex items-center rounded-full px-3 py-1 text-sm font-bold bg-brand/10 text-brand ring-1 ring-inset ring-brand/20 mb-8 lowercase tracking-tight">
-              club manager beta
+              Angemeldet als: <span className="ml-1.5 font-black uppercase text-[10px]">{session?.user?.name} ({isAdmin ? 'Admin' : 'Spieler'})</span>
             </div>
             <h1 className="text-4xl font-black tracking-tight sm:text-7xl text-brand mb-4">
               Vereinsverwaltung auf dem <br /> nächsten Level.
             </h1>
             <p className="mt-8 text-xl leading-8 text-slate-600 max-w-2xl mx-auto font-medium">
               Verwalte deine 1. und 2. Mannschaft der ERS Pattensen mit einem professionellen System für Kader,
-              Taktik und Performance-Analyse.
+              Taktik und Performance.
             </p>
 
             <div className="mt-12 flex items-center justify-center gap-x-12">
@@ -128,7 +151,7 @@ export default function Home() {
 
           {/* Grid */}
           <div className="mt-24 grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
-            {features.map((feature, index) => (
+            {filteredFeatures.map((feature, index) => (
               <motion.div
                 key={feature.title}
                 initial={{ opacity: 0, y: 20 }}

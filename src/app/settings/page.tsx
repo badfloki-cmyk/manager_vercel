@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import {
     Settings,
     ArrowLeft,
@@ -62,8 +62,106 @@ const settingSections: SettingSection[] = [
     },
 ];
 
+import { useEffect } from "react";
+import { useSession } from "next-auth/react";
+import { UserPlus, UserCircle, ShieldAlert, Loader2, Save, Trash2 } from "lucide-react";
+
 export default function SettingsPage() {
+    const { data: session } = useSession();
+    const isAdmin = (session?.user as any)?.role === "admin";
+
     const [activeSection, setActiveSection] = useState<string | null>(null);
+    const [users, setUsers] = useState<any[]>([]);
+    const [isLoadingUsers, setIsLoadingUsers] = useState(false);
+
+    // New User form
+    const [newUserName, setNewUserName] = useState("");
+    const [newUserEmail, setNewUserEmail] = useState("");
+    const [newUserPassword, setNewUserPassword] = useState("");
+    const [newUserRole, setNewUserRole] = useState<"player" | "admin">("player");
+    const [isSaving, setIsSaving] = useState(false);
+    const [saveStatus, setSaveStatus] = useState<{ type: 'success' | 'error', message: string } | null>(null);
+
+    const fetchUsers = async () => {
+        if (!isAdmin) return;
+        setIsLoadingUsers(true);
+        try {
+            const res = await fetch("/api/users");
+            const data = await res.json();
+            setUsers(data.users || []);
+        } catch (err) {
+            console.error("Fetch users error:", err);
+        } finally {
+            setIsLoadingUsers(false);
+        }
+    };
+
+    useEffect(() => {
+        if (activeSection === "Benutzer & Rollen") {
+            fetchUsers();
+        }
+    }, [activeSection]);
+
+    const handleCreateUser = async (e: React.FormEvent) => {
+        e.preventDefault();
+        setIsSaving(true);
+        setSaveStatus(null);
+        try {
+            const res = await fetch("/api/users", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    name: newUserName,
+                    email: newUserEmail,
+                    password: newUserPassword,
+                    role: newUserRole
+                }),
+            });
+
+            const data = await res.json();
+            if (res.ok) {
+                setSaveStatus({ type: 'success', message: "Benutzer erfolgreich erstellt!" });
+                setNewUserName("");
+                setNewUserEmail("");
+                setNewUserPassword("");
+                fetchUsers();
+            } else {
+                setSaveStatus({ type: 'error', message: data.error || "Fehler beim Erstellen." });
+            }
+        } catch (err) {
+            setSaveStatus({ type: 'error', message: "Verbindungsfehler." });
+        } finally {
+            setIsSaving(false);
+        }
+    };
+
+    const handleDeleteUser = async (userId: string) => {
+        if (!confirm("Bist du sicher, dass du diesen Account löschen möchtest?")) return;
+        try {
+            const res = await fetch(`/api/users/${userId}`, { method: "DELETE" });
+            const data = await res.json();
+            if (res.ok) {
+                fetchUsers();
+            } else {
+                alert(data.error || "Fehler beim Löschen.");
+            }
+        } catch (err) {
+            console.error("Delete user error:", err);
+        }
+    };
+
+    if (!isAdmin) {
+        return (
+            <div className="min-h-screen bg-white flex flex-col items-center justify-center p-6">
+                <ShieldAlert className="w-16 h-16 text-brand mb-6" />
+                <h1 className="text-2xl font-black text-slate-900 mb-2">Zugriff verweigert</h1>
+                <p className="text-slate-500 font-medium">Nur Admins können diese Seite aufrufen.</p>
+                <Link href="/" className="mt-8 px-8 py-3 bg-brand text-white rounded-2xl font-black uppercase text-xs tracking-widest shadow-xl shadow-brand/20">
+                    Zurück zum Dashboard
+                </Link>
+            </div>
+        );
+    }
 
     return (
         <div className="min-h-screen bg-white text-slate-900">
@@ -106,17 +204,8 @@ export default function SettingsPage() {
                             <p className="text-slate-400 font-bold uppercase text-[10px] tracking-widest mt-1">Eintracht Rot-Schwarz Pattensen</p>
                             <div className="flex items-center gap-4 mt-4">
                                 <span className="text-[10px] bg-brand text-white px-3 py-1 rounded-lg font-black uppercase tracking-widest shadow-lg shadow-brand/20">
-                                    2 Mannschaften
+                                    Admin Bereich
                                 </span>
-                                <a
-                                    href="https://erspattensen.de"
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="text-[10px] text-slate-400 hover:text-brand transition-all flex items-center gap-1.5 font-black uppercase tracking-widest"
-                                >
-                                    erspattensen.de
-                                    <ExternalLink className="w-3 h-3" />
-                                </a>
                             </div>
                         </div>
                     </div>
@@ -125,38 +214,161 @@ export default function SettingsPage() {
                 {/* Settings Sections */}
                 <div className="space-y-4">
                     {settingSections.map((section, index) => (
-                        <motion.button
-                            key={section.title}
-                            initial={{ opacity: 0, x: -20 }}
-                            animate={{ opacity: 1, x: 0 }}
-                            transition={{ delay: index * 0.05 }}
-                            onClick={() => setActiveSection(activeSection === section.title ? null : section.title)}
-                            className={cn(
-                                "w-full flex items-center justify-between p-6 bg-white border border-slate-100 rounded-2xl hover:shadow-xl hover:shadow-slate-200/40 transition-all group text-left",
-                                activeSection === section.title && "border-brand/40 shadow-xl shadow-brand/5 ring-4 ring-brand/5"
-                            )}
-                        >
-                            <div className="flex items-center gap-6">
-                                <div className="w-14 h-14 rounded-2xl bg-slate-50 border border-slate-100 flex items-center justify-center group-hover:bg-brand/5 group-hover:border-brand/10 transition-colors">
-                                    <section.icon className="w-6 h-6 text-slate-400 group-hover:text-brand transition-colors" />
-                                </div>
-                                <div className="space-y-0.5">
-                                    <div className="flex items-center gap-3">
-                                        <h3 className="font-black text-slate-900 tracking-tight">{section.title}</h3>
-                                        {section.badge && (
-                                            <span className="text-[10px] bg-slate-100 text-slate-400 px-3 py-1 rounded-lg font-black uppercase tracking-widest leading-none border border-slate-200 shadow-sm">
-                                                {section.badge}
-                                            </span>
-                                        )}
+                        <div key={section.title} className="space-y-4">
+                            <motion.button
+                                initial={{ opacity: 0, x: -20 }}
+                                animate={{ opacity: 1, x: 0 }}
+                                transition={{ delay: index * 0.05 }}
+                                onClick={() => setActiveSection(activeSection === section.title ? null : section.title)}
+                                className={cn(
+                                    "w-full flex items-center justify-between p-6 bg-white border border-slate-100 rounded-2xl hover:shadow-xl hover:shadow-slate-200/40 transition-all group text-left",
+                                    activeSection === section.title && "border-brand/40 shadow-xl shadow-brand/5 ring-4 ring-brand/5"
+                                )}
+                            >
+                                <div className="flex items-center gap-6">
+                                    <div className="w-14 h-14 rounded-2xl bg-slate-50 border border-slate-100 flex items-center justify-center group-hover:bg-brand/5 group-hover:border-brand/10 transition-colors">
+                                        <section.icon className="w-6 h-6 text-slate-400 group-hover:text-brand transition-colors" />
                                     </div>
-                                    <p className="text-sm text-slate-500 font-medium">{section.description}</p>
+                                    <div className="space-y-0.5">
+                                        <div className="flex items-center gap-3">
+                                            <h3 className="font-black text-slate-900 tracking-tight">{section.title}</h3>
+                                            {section.badge && (
+                                                <span className="text-[10px] bg-slate-100 text-slate-400 px-3 py-1 rounded-lg font-black uppercase tracking-widest leading-none border border-slate-200 shadow-sm">
+                                                    {section.badge}
+                                                </span>
+                                            )}
+                                        </div>
+                                        <p className="text-sm text-slate-500 font-medium">{section.description}</p>
+                                    </div>
                                 </div>
-                            </div>
-                            <ChevronRight className={cn(
-                                "w-5 h-5 text-slate-200 transition-all group-hover:text-brand",
-                                activeSection === section.title && "rotate-90 text-brand"
-                            )} />
-                        </motion.button>
+                                <ChevronRight className={cn(
+                                    "w-5 h-5 text-slate-200 transition-all group-hover:text-brand",
+                                    activeSection === section.title && "rotate-90 text-brand"
+                                )} />
+                            </motion.button>
+
+                            <AnimatePresence>
+                                {activeSection === "Benutzer & Rollen" && section.title === "Benutzer & Rollen" && (
+                                    <motion.div
+                                        initial={{ opacity: 0, height: 0 }}
+                                        animate={{ opacity: 1, height: "auto" }}
+                                        exit={{ opacity: 0, height: 0 }}
+                                        className="overflow-hidden px-2"
+                                    >
+                                        <div className="bg-slate-50 border border-slate-100 rounded-[2rem] p-8 space-y-10">
+                                            {/* Create User Form */}
+                                            <div className="space-y-6">
+                                                <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-1 flex items-center gap-2">
+                                                    <UserPlus className="w-3 h-3" />
+                                                    Neuen Account anlegen
+                                                </h4>
+                                                <form onSubmit={handleCreateUser} className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                                    <div className="space-y-2">
+                                                        <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Vollständiger Name</label>
+                                                        <input
+                                                            required
+                                                            value={newUserName}
+                                                            onChange={(e) => setNewUserName(e.target.value)}
+                                                            className="w-full bg-white border border-slate-200 rounded-xl px-4 py-3 text-sm font-medium focus:border-brand/30 outline-none transition-all"
+                                                            placeholder="z.B. Max Mustermann"
+                                                        />
+                                                    </div>
+                                                    <div className="space-y-2">
+                                                        <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Email Adresse</label>
+                                                        <input
+                                                            required
+                                                            type="email"
+                                                            value={newUserEmail}
+                                                            onChange={(e) => setNewUserEmail(e.target.value)}
+                                                            className="w-full bg-white border border-slate-200 rounded-xl px-4 py-3 text-sm font-medium focus:border-brand/30 outline-none transition-all"
+                                                            placeholder="max@beispiel.de"
+                                                        />
+                                                    </div>
+                                                    <div className="space-y-2">
+                                                        <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Passwort</label>
+                                                        <input
+                                                            required
+                                                            type="password"
+                                                            value={newUserPassword}
+                                                            onChange={(e) => setNewUserPassword(e.target.value)}
+                                                            className="w-full bg-white border border-slate-200 rounded-xl px-4 py-3 text-sm font-medium focus:border-brand/30 outline-none transition-all"
+                                                            placeholder="••••••••"
+                                                        />
+                                                    </div>
+                                                    <div className="space-y-2">
+                                                        <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Rolle</label>
+                                                        <select
+                                                            value={newUserRole}
+                                                            onChange={(e) => setNewUserRole(e.target.value as any)}
+                                                            className="w-full bg-white border border-slate-200 rounded-xl px-4 py-3 text-sm font-black uppercase tracking-widest focus:border-brand/30 outline-none transition-all appearance-none cursor-pointer"
+                                                        >
+                                                            <option value="player">Spieler (Lesen)</option>
+                                                            <option value="admin">Admin (Vollzugriff)</option>
+                                                        </select>
+                                                    </div>
+                                                    <div className="md:col-span-2 flex items-center justify-between gap-4">
+                                                        {saveStatus && (
+                                                            <span className={cn(
+                                                                "text-[10px] font-black uppercase tracking-widest",
+                                                                saveStatus.type === 'success' ? "text-emerald-500" : "text-brand"
+                                                            )}>
+                                                                {saveStatus.message}
+                                                            </span>
+                                                        )}
+                                                        <button
+                                                            disabled={isSaving}
+                                                            type="submit"
+                                                            className="bg-brand hover:bg-brand-dark text-white px-8 py-3 rounded-xl font-black uppercase text-xs tracking-widest shadow-lg shadow-brand/10 transition-all flex items-center gap-2 disabled:opacity-50 ml-auto"
+                                                        >
+                                                            {isSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+                                                            Account Erstellen
+                                                        </button>
+                                                    </div>
+                                                </form>
+                                            </div>
+
+                                            {/* Users List */}
+                                            <div className="space-y-6">
+                                                <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-1">Existierende Benutzer</h4>
+                                                <div className="space-y-3">
+                                                    {isLoadingUsers ? (
+                                                        <div className="flex justify-center py-6">
+                                                            <Loader2 className="w-6 h-6 animate-spin text-slate-200" />
+                                                        </div>
+                                                    ) : users.map(user => (
+                                                        <div key={user._id} className="flex items-center justify-between p-4 bg-white border border-slate-100 rounded-2xl shadow-sm">
+                                                            <div className="flex items-center gap-4">
+                                                                <div className="w-10 h-10 rounded-xl bg-slate-50 flex items-center justify-center text-slate-400">
+                                                                    <UserCircle className="w-6 h-6" />
+                                                                </div>
+                                                                <div>
+                                                                    <p className="font-black text-slate-900 text-sm">{user.name}</p>
+                                                                    <p className="text-[10px] text-slate-400 font-medium">{user.email}</p>
+                                                                </div>
+                                                            </div>
+                                                            <div className="flex items-center gap-4">
+                                                                <span className={cn(
+                                                                    "px-3 py-1 rounded-lg text-[8px] font-black uppercase tracking-widest ring-1 ring-inset",
+                                                                    user.role === 'admin' ? "bg-brand/5 text-brand ring-brand/20" : "bg-slate-100 text-slate-400 ring-slate-200"
+                                                                )}>
+                                                                    {user.role}
+                                                                </span>
+                                                                <button
+                                                                    onClick={() => handleDeleteUser(user._id)}
+                                                                    className="p-2 text-slate-300 hover:text-brand hover:bg-brand/5 rounded-xl transition-all"
+                                                                >
+                                                                    <Trash2 className="w-4 h-4" />
+                                                                </button>
+                                                            </div>
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </motion.div>
+                                )}
+                            </AnimatePresence>
+                        </div>
                     ))}
                 </div>
 
@@ -167,12 +379,7 @@ export default function SettingsPage() {
                             <Settings className="w-5 h-5 text-slate-300" />
                         </div>
                         <p className="text-slate-400 text-[10px] font-black uppercase tracking-[0.3em]">Club Manager</p>
-                        <p className="text-slate-300 text-[10px] font-bold mt-2">Version 2.0.7 • Powered by Next.js & Vercel</p>
-                        <div className="flex justify-center gap-8 mt-8">
-                            <a href="#" className="text-[10px] font-black uppercase tracking-widest text-slate-400 hover:text-brand transition-colors">Impressum</a>
-                            <a href="#" className="text-[10px] font-black uppercase tracking-widest text-slate-400 hover:text-brand transition-colors">Datenschutz</a>
-                            <a href="#" className="text-[10px] font-black uppercase tracking-widest text-slate-400 hover:text-brand transition-colors">Support</a>
-                        </div>
+                        <p className="text-slate-300 text-[10px] font-bold mt-2">Version 2.0.8 • Powered by Next.js & Vercel</p>
                     </div>
                 </div>
             </main>

@@ -8,20 +8,27 @@ import {
     MapPin,
     Clock,
     Users,
-    ArrowLeft
+    ArrowLeft,
+    Edit,
+    Trash2,
+    X
 } from "lucide-react";
 import { useCallback } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { cn } from "@/lib/utils";
-import { getEvents, createEvent, Event } from "@/lib/events";
+import { useSession } from "next-auth/react";
+import { getEvents, createEvent, updateEvent, deleteEvent, Event } from "@/lib/events";
 
 export default function CalendarPage() {
+    const { data: session } = useSession();
+    const isAdmin = (session?.user as any)?.role === "admin";
     const [team, setTeam] = useState<"1. Mannschaft" | "2. Mannschaft" | "Both">("Both");
     const [events, setEvents] = useState<Event[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [editingEventId, setEditingEventId] = useState<string | null>(null);
 
     // New Event Form State
     const [newEvent, setNewEvent] = useState<{
@@ -62,12 +69,18 @@ export default function CalendarPage() {
         loadEvents();
     }, [loadEvents]);
 
-    const handleAddEvent = async (e: React.FormEvent) => {
+    const handleSubmitEvent = async (e: React.FormEvent) => {
         e.preventDefault();
         setIsSubmitting(true);
         try {
-            await createEvent(newEvent);
+            if (editingEventId) {
+                await updateEvent(editingEventId, newEvent);
+            } else {
+                await createEvent(newEvent);
+            }
+
             setIsModalOpen(false);
+            setEditingEventId(null);
             setNewEvent({
                 title: "",
                 description: "",
@@ -81,11 +94,54 @@ export default function CalendarPage() {
             });
             loadEvents();
         } catch (error) {
-            console.error("Error creating event:", error);
-            alert("Fehler beim Erstellen des Termins.");
+            console.error("Error saving event:", error);
+            alert("Fehler beim Speichern des Termins.");
         } finally {
             setIsSubmitting(false);
         }
+    };
+
+    const handleDeleteEvent = async (id: string) => {
+        if (!confirm("Bist du sicher, dass du diesen Termin löschen möchtest?")) return;
+        try {
+            await deleteEvent(id);
+            loadEvents();
+        } catch (error) {
+            console.error("Delete error:", error);
+            alert("Fehler beim Löschen.");
+        }
+    };
+
+    const openEditModal = (event: Event) => {
+        setEditingEventId(event._id);
+        setNewEvent({
+            title: event.title,
+            description: event.description || "",
+            type: event.type,
+            date: new Date(event.date).toISOString().slice(0, 16),
+            location: event.location,
+            meetingPoint: event.meetingPoint || "",
+            meetingTime: event.meetingTime || "",
+            notes: event.notes || "",
+            team: event.team,
+        });
+        setIsModalOpen(true);
+    };
+
+    const openAddModal = () => {
+        setEditingEventId(null);
+        setNewEvent({
+            title: "",
+            description: "",
+            type: "Training",
+            date: "",
+            location: "KGS Pattensen",
+            meetingPoint: "",
+            meetingTime: "",
+            notes: "",
+            team: "Both",
+        });
+        setIsModalOpen(true);
     };
 
     const getTypeStyles = (type: string) => {
@@ -133,13 +189,15 @@ export default function CalendarPage() {
                         <CalendarIcon className="w-6 h-6 text-brand" />
                         Anstehende Termine
                     </h2>
-                    <button
-                        onClick={() => setIsModalOpen(true)}
-                        className="flex items-center gap-2 bg-brand hover:bg-brand-dark text-white px-6 py-2.5 rounded-xl font-medium transition-all active:scale-95 shadow-lg shadow-brand/10"
-                    >
-                        <Plus className="w-4 h-4" />
-                        Neuer Termin
-                    </button>
+                    {isAdmin && (
+                        <button
+                            onClick={openAddModal}
+                            className="bg-brand hover:bg-brand-dark text-white px-8 py-3.5 rounded-2xl font-black uppercase text-xs tracking-widest transition-all active:scale-95 flex items-center gap-3 shadow-xl shadow-brand/20"
+                        >
+                            <Plus className="w-5 h-5" />
+                            Termin anlegen
+                        </button>
+                    )}
                 </div>
 
                 {/* Event List */}
@@ -199,6 +257,22 @@ export default function CalendarPage() {
                                                                 </span>
                                                                 <h3 className="text-2xl font-black text-slate-900 tracking-tight">{event.title}</h3>
                                                             </div>
+                                                            {isAdmin && (
+                                                                <div className="flex gap-2">
+                                                                    <button
+                                                                        onClick={() => openEditModal(event)}
+                                                                        className="p-2 text-slate-400 hover:text-brand hover:bg-brand/5 rounded-xl transition-all"
+                                                                    >
+                                                                        <Edit className="w-4 h-4" />
+                                                                    </button>
+                                                                    <button
+                                                                        onClick={() => handleDeleteEvent(event._id)}
+                                                                        className="p-2 text-slate-400 hover:text-brand hover:bg-brand/5 rounded-xl transition-all"
+                                                                    >
+                                                                        <Trash2 className="w-4 h-4" />
+                                                                    </button>
+                                                                </div>
+                                                            )}
                                                         </div>
 
                                                         {event.description && (
@@ -284,8 +358,18 @@ export default function CalendarPage() {
                             exit={{ opacity: 0, scale: 0.95, y: 20 }}
                             className="relative w-full max-w-lg bg-white border border-slate-100 rounded-[2.5rem] p-10 shadow-2xl"
                         >
-                            <h2 className="text-3xl font-black mb-8 text-brand tracking-tight">Neuer Termin</h2>
-                            <form onSubmit={handleAddEvent} className="space-y-6">
+                            <div className="flex items-center justify-between mb-8">
+                                <h2 className="text-3xl font-black text-brand tracking-tight">
+                                    {editingEventId ? "Termin bearbeiten" : "Neuer Termin"}
+                                </h2>
+                                <button
+                                    onClick={() => setIsModalOpen(false)}
+                                    className="p-2 hover:bg-slate-50 rounded-xl transition-all text-slate-400"
+                                >
+                                    <X className="w-5 h-5" />
+                                </button>
+                            </div>
+                            <form onSubmit={handleSubmitEvent} className="space-y-6">
                                 <div className="space-y-2">
                                     <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-1">Titel</label>
                                     <input
@@ -381,7 +465,7 @@ export default function CalendarPage() {
                                         type="submit"
                                         className="flex-1 bg-brand hover:bg-brand-dark text-white px-8 py-3.5 rounded-2xl font-black uppercase text-xs tracking-widest transition-all active:scale-95 shadow-xl shadow-brand/20 disabled:opacity-50"
                                     >
-                                        {isSubmitting ? "Wird erstellt..." : "Termin anlegen"}
+                                        {isSubmitting ? "Wird gespeichert..." : (editingEventId ? "Speichern" : "Termin anlegen")}
                                     </button>
                                 </div>
                             </form>

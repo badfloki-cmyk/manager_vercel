@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server';
 import connectDB from '@/lib/mongodb';
 import Event from '@/models/Event';
+import { getServerSession } from "next-auth";
+import { authOptions } from "../auth/[...nextauth]/route";
 
 export async function GET(request: Request) {
     try {
@@ -24,6 +26,11 @@ export async function GET(request: Request) {
 
 export async function POST(request: Request) {
     try {
+        const session = await getServerSession(authOptions);
+        if (!session || (session.user as any).role !== "admin") {
+            return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+        }
+
         await connectDB();
         const body = await request.json();
         const event = await Event.create(body);
