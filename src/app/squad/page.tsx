@@ -9,14 +9,17 @@ import {
     Search,
     ArrowLeft,
     Camera,
-    Upload
+    Upload,
+    Armchair,
+    ArrowUpFromLine,
+    ArrowDownToLine
 } from "lucide-react";
 import { useCallback, useRef } from "react";
 import React from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { cn } from "@/lib/utils";
-import { getPlayers, createPlayer, deletePlayer, Player } from "@/lib/squad";
+import { getPlayers, createPlayer, deletePlayer, updatePlayer, Player } from "@/lib/squad";
 
 export default function SquadPage() {
     const [team, setTeam] = useState<"1. Mannschaft" | "2. Mannschaft">("1. Mannschaft");
@@ -25,6 +28,7 @@ export default function SquadPage() {
     const [searchTerm, setSearchTerm] = useState("");
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [showBench, setShowBench] = useState(true);
 
     // New Player Form State
     const [newPlayer, setNewPlayer] = useState<{
@@ -102,6 +106,7 @@ export default function SquadPage() {
                 number: parseInt(newPlayer.number || "0"),
                 team: team,
                 photoUrl: photoUrl,
+                onBench: false,
                 stats: { goals: 0, assists: 0, appearances: 0 }
             });
             setIsModalOpen(false);
@@ -128,9 +133,114 @@ export default function SquadPage() {
         }
     };
 
+    const toggleBench = async (player: Player) => {
+        try {
+            await updatePlayer(player._id, { onBench: !player.onBench });
+            loadPlayers();
+        } catch (error) {
+            console.error("Error updating player:", error);
+        }
+    };
+
     const filteredPlayers = players.filter(p =>
         `${p.firstName} ${p.lastName}`.toLowerCase().includes(searchTerm.toLowerCase()) ||
         p.position.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+
+    const activePlayers = filteredPlayers.filter(p => !p.onBench);
+    const benchPlayers = filteredPlayers.filter(p => p.onBench);
+
+    const PlayerCard = ({ player, index }: { player: Player; index: number }) => (
+        <motion.div
+            key={player._id}
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.95 }}
+            transition={{ duration: 0.2, delay: index * 0.05 }}
+            className={cn(
+                "group relative bg-slate-900/40 border p-6 rounded-2xl hover:bg-slate-800/40 transition-all",
+                player.onBench ? "border-slate-700/50 opacity-75" : "border-slate-800 hover:border-red-500/30"
+            )}
+        >
+            <div className="flex items-start justify-between mb-4">
+                <div className="flex items-center gap-4">
+                    <div className="w-14 h-14 rounded-xl bg-slate-800 flex items-center justify-center text-xl font-bold text-red-500 overflow-hidden relative border border-slate-700">
+                        {player.photoUrl ? (
+                            <Image
+                                src={player.photoUrl}
+                                alt={`${player.firstName} ${player.lastName}`}
+                                fill
+                                className="object-cover"
+                            />
+                        ) : (
+                            player.number
+                        )}
+                    </div>
+                    <div>
+                        <h3 className="font-bold text-lg leading-snug">
+                            {player.firstName} <br /> {player.lastName}
+                        </h3>
+                        <p className="text-slate-500 text-sm uppercase tracking-wider font-semibold">
+                            {player.position}
+                        </p>
+                    </div>
+                </div>
+                <div className="flex flex-col gap-2 items-end">
+                    <div className={cn(
+                        "px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-tighter",
+                        player.status === "Active" ? "bg-emerald-500/10 text-emerald-500" : "bg-orange-500/10 text-orange-500"
+                    )}>
+                        {player.status}
+                    </div>
+                    {player.onBench && (
+                        <div className="px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-tighter bg-slate-700 text-slate-400">
+                            Bank
+                        </div>
+                    )}
+                </div>
+            </div>
+
+            <div className="grid grid-cols-3 gap-4 pt-4 border-t border-slate-800/50">
+                <div className="text-center">
+                    <p className="text-[10px] text-slate-500 uppercase font-bold mb-0.5">Tore</p>
+                    <p className="font-bold">{player.stats.goals}</p>
+                </div>
+                <div className="text-center">
+                    <p className="text-[10px] text-slate-500 uppercase font-bold mb-0.5">Assists</p>
+                    <p className="font-bold">{player.stats.assists}</p>
+                </div>
+                <div className="text-center">
+                    <p className="text-[10px] text-slate-500 uppercase font-bold mb-0.5">Einsätze</p>
+                    <p className="font-bold">{player.stats.appearances}</p>
+                </div>
+            </div>
+
+            {/* Action Buttons */}
+            <div className="absolute top-4 right-4 flex gap-1 opacity-0 group-hover:opacity-100 transition-all">
+                <button
+                    onClick={() => toggleBench(player)}
+                    className={cn(
+                        "p-2 rounded-lg transition-all",
+                        player.onBench
+                            ? "hover:bg-emerald-500/10 hover:text-emerald-500"
+                            : "hover:bg-orange-500/10 hover:text-orange-500"
+                    )}
+                    title={player.onBench ? "Auf Feld setzen" : "Auf Bank setzen"}
+                >
+                    {player.onBench ? (
+                        <ArrowUpFromLine className="w-4 h-4" />
+                    ) : (
+                        <ArrowDownToLine className="w-4 h-4" />
+                    )}
+                </button>
+                <button
+                    onClick={() => handleDeletePlayer(player._id)}
+                    className="p-2 hover:bg-red-500/10 hover:text-red-500 rounded-lg transition-all"
+                >
+                    <Trash2 className="w-4 h-4" />
+                </button>
+            </div>
+        </motion.div>
     );
 
     return (
@@ -196,12 +306,12 @@ export default function SquadPage() {
                         <h3 className="text-2xl font-bold">{players.length} Spieler</h3>
                     </div>
                     <div className="bg-slate-900/50 border border-slate-800 p-6 rounded-2xl">
-                        <p className="text-slate-500 text-sm mb-1">Top Torschütze</p>
-                        <h3 className="text-2xl font-bold">In Analyse...</h3>
+                        <p className="text-slate-500 text-sm mb-1">Aktive Spieler</p>
+                        <h3 className="text-2xl font-bold text-emerald-400">{activePlayers.length}</h3>
                     </div>
                     <div className="bg-slate-900/50 border border-slate-800 p-6 rounded-2xl">
-                        <p className="text-slate-500 text-sm mb-1">Nächstes Spiel</p>
-                        <h3 className="text-2xl font-bold">In Kürze</h3>
+                        <p className="text-slate-500 text-sm mb-1">Auf Bank</p>
+                        <h3 className="text-2xl font-bold text-orange-400">{benchPlayers.length}</h3>
                     </div>
                     <div className="bg-slate-900/50 border border-slate-800 p-6 rounded-2xl">
                         <p className="text-slate-500 text-sm mb-1">Verfügbarkeit</p>
@@ -215,80 +325,66 @@ export default function SquadPage() {
                         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-red-500" />
                     </div>
                 ) : (
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                        <AnimatePresence mode="popLayout">
-                            {filteredPlayers.map((player, index) => (
-                                <motion.div
-                                    key={player._id}
-                                    initial={{ opacity: 0, scale: 0.95 }}
-                                    animate={{ opacity: 1, scale: 1 }}
-                                    exit={{ opacity: 0, scale: 0.95 }}
-                                    transition={{ duration: 0.2, delay: index * 0.05 }}
-                                    className="group relative bg-slate-900/40 border border-slate-800 p-6 rounded-2xl hover:border-red-500/30 hover:bg-slate-800/40 transition-all"
-                                >
-                                    <div className="flex items-start justify-between mb-4">
-                                        <div className="flex items-center gap-4">
-                                            <div className="w-14 h-14 rounded-xl bg-slate-800 flex items-center justify-center text-xl font-bold text-red-500 overflow-hidden relative border border-slate-700">
-                                                {player.photoUrl ? (
-                                                    <Image
-                                                        src={player.photoUrl}
-                                                        alt={`${player.firstName} ${player.lastName}`}
-                                                        fill
-                                                        className="object-cover"
-                                                    />
-                                                ) : (
-                                                    player.number
-                                                )}
-                                            </div>
-                                            <div>
-                                                <h3 className="font-bold text-lg leading-snug">
-                                                    {player.firstName} <br /> {player.lastName}
-                                                </h3>
-                                                <p className="text-slate-500 text-sm uppercase tracking-wider font-semibold">
-                                                    {player.position}
-                                                </p>
-                                            </div>
-                                        </div>
-                                        <div className={cn(
-                                            "px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-tighter",
-                                            player.status === "Active" ? "bg-emerald-500/10 text-emerald-500" : "bg-orange-500/10 text-orange-500"
-                                        )}>
-                                            {player.status}
-                                        </div>
-                                    </div>
-
-                                    <div className="grid grid-cols-3 gap-4 pt-4 border-t border-slate-800/50">
-                                        <div className="text-center">
-                                            <p className="text-[10px] text-slate-500 uppercase font-bold mb-0.5">Tore</p>
-                                            <p className="font-bold">{player.stats.goals}</p>
-                                        </div>
-                                        <div className="text-center">
-                                            <p className="text-[10px] text-slate-500 uppercase font-bold mb-0.5">Assists</p>
-                                            <p className="font-bold">{player.stats.assists}</p>
-                                        </div>
-                                        <div className="text-center">
-                                            <p className="text-[10px] text-slate-500 uppercase font-bold mb-0.5">Einsätze</p>
-                                            <p className="font-bold">{player.stats.appearances}</p>
-                                        </div>
-                                    </div>
-
-                                    <button
-                                        onClick={() => handleDeletePlayer(player._id)}
-                                        className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 p-2 hover:bg-red-500/10 hover:text-red-500 rounded-lg transition-all"
-                                    >
-                                        <Trash2 className="w-4 h-4" />
-                                    </button>
-                                </motion.div>
-                            ))}
-                        </AnimatePresence>
-
-                        {filteredPlayers.length === 0 && (
-                            <div className="col-span-full py-20 text-center">
-                                <Users className="w-12 h-12 text-slate-700 mx-auto mb-4" />
-                                <p className="text-slate-500">Keine Spieler gefunden.</p>
+                    <>
+                        {/* Active Players */}
+                        <div className="mb-8">
+                            <h2 className="text-lg font-bold mb-4 flex items-center gap-2">
+                                <Users className="w-5 h-5 text-red-500" />
+                                Aktive Spieler ({activePlayers.length})
+                            </h2>
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                                <AnimatePresence mode="popLayout">
+                                    {activePlayers.map((player, index) => (
+                                        <PlayerCard key={player._id} player={player} index={index} />
+                                    ))}
+                                </AnimatePresence>
                             </div>
-                        )}
-                    </div>
+                            {activePlayers.length === 0 && (
+                                <div className="py-12 text-center border-2 border-dashed border-slate-800 rounded-2xl">
+                                    <Users className="w-10 h-10 text-slate-700 mx-auto mb-3" />
+                                    <p className="text-slate-500">Keine aktiven Spieler.</p>
+                                </div>
+                            )}
+                        </div>
+
+                        {/* Bench Section */}
+                        <div>
+                            <button
+                                onClick={() => setShowBench(!showBench)}
+                                className="w-full flex items-center justify-between p-4 bg-slate-900/50 border border-slate-800 rounded-2xl mb-4 hover:bg-slate-800/50 transition-colors"
+                            >
+                                <h2 className="text-lg font-bold flex items-center gap-2">
+                                    <Armchair className="w-5 h-5 text-orange-500" />
+                                    Wechselbank ({benchPlayers.length})
+                                </h2>
+                                <span className="text-slate-500 text-sm">
+                                    {showBench ? "Ausblenden" : "Anzeigen"}
+                                </span>
+                            </button>
+
+                            <AnimatePresence>
+                                {showBench && (
+                                    <motion.div
+                                        initial={{ opacity: 0, height: 0 }}
+                                        animate={{ opacity: 1, height: "auto" }}
+                                        exit={{ opacity: 0, height: 0 }}
+                                        className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+                                    >
+                                        {benchPlayers.map((player, index) => (
+                                            <PlayerCard key={player._id} player={player} index={index} />
+                                        ))}
+                                    </motion.div>
+                                )}
+                            </AnimatePresence>
+
+                            {showBench && benchPlayers.length === 0 && (
+                                <div className="py-12 text-center border-2 border-dashed border-slate-800 rounded-2xl">
+                                    <Armchair className="w-10 h-10 text-slate-700 mx-auto mb-3" />
+                                    <p className="text-slate-500">Keine Spieler auf der Bank.</p>
+                                </div>
+                            )}
+                        </div>
+                    </>
                 )}
             </main>
 
