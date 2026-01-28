@@ -10,6 +10,7 @@ export interface Player {
     status: 'Active' | 'Injured' | 'Away';
     role: 'Captain' | 'Regular';
     photoUrl?: string;
+    onBench: boolean;
     stats: {
         goals: number;
         assists: number;
