@@ -21,7 +21,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { cn } from "@/lib/utils";
 import { getPlayers, Player } from "@/lib/squad";
-import { getTactics, createTactic, deleteTactic, TacticData } from "@/lib/tactics";
+import { getTactics, createTactic, deleteTactic, updateTactic, TacticData } from "@/lib/tactics";
 import { useSession } from "next-auth/react";
 
 type GameMode = "football" | "futsal";
@@ -58,6 +58,8 @@ export default function TacticsPage() {
     const [showLoadModal, setShowLoadModal] = useState(false);
     const [searchTerm, setSearchTerm] = useState("");
     const [teamFilter, setTeamFilter] = useState<"All" | "1. Mannschaft" | "2. Mannschaft">("All");
+    const [editingTacticId, setEditingTacticId] = useState<string | null>(null);
+    const [editName, setEditName] = useState("");
 
     const { data: session } = useSession();
     const isAdmin = session?.user?.role === "admin";
@@ -161,6 +163,33 @@ export default function TacticsPage() {
         } catch (err) {
             console.error("Delete error:", err);
         }
+    };
+
+    const startEditingTactic = (tactic: TacticData, e: React.MouseEvent) => {
+        e.stopPropagation();
+        setEditingTacticId(tactic._id!);
+        setEditName(tactic.name);
+    };
+
+    const saveTacticName = async (e: React.MouseEvent) => {
+        e.stopPropagation();
+        if (!editingTacticId || !editName.trim()) return;
+        try {
+            await updateTactic(editingTacticId, { name: editName });
+            setSavedTactics(prev => prev.map(t =>
+                t._id === editingTacticId ? { ...t, name: editName } : t
+            ));
+            setEditingTacticId(null);
+            setEditName("");
+        } catch (err) {
+            console.error("Update error:", err);
+        }
+    };
+
+    const cancelEditingTactic = (e: React.MouseEvent) => {
+        e.stopPropagation();
+        setEditingTacticId(null);
+        setEditName("");
     };
 
     const addPlayerToPitch = (player: Player) => {
@@ -288,8 +317,12 @@ export default function TacticsPage() {
                         {filteredAvailable.map(player => (
                             <button
                                 key={player._id}
-                                onClick={() => addPlayerToPitch(player)}
-                                className="w-full group flex items-center justify-between p-3 bg-white border border-slate-100 rounded-2xl hover:shadow-lg hover:shadow-brand/5 hover:border-brand/20 transition-all text-left shadow-sm"
+                                disabled={!isAdmin}
+                                onClick={() => isAdmin && addPlayerToPitch(player)}
+                                className={cn(
+                                    "w-full group flex items-center justify-between p-3 bg-white border border-slate-100 rounded-2xl transition-all text-left shadow-sm",
+                                    isAdmin ? "hover:shadow-lg hover:shadow-brand/5 hover:border-brand/20 cursor-pointer" : "opacity-75 cursor-default"
+                                )}
                             >
                                 <div className="flex items-center gap-4">
                                     <div className={cn(
@@ -303,7 +336,9 @@ export default function TacticsPage() {
                                         <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">{player.position}</p>
                                     </div>
                                 </div>
-                                <Plus className="w-4 h-4 text-brand opacity-0 group-hover:opacity-100 transition-opacity" />
+                                {isAdmin && (
+                                    <Plus className="w-4 h-4 text-brand opacity-0 group-hover:opacity-100 transition-opacity" />
+                                )}
                             </button>
                         ))}
                     </div>
@@ -429,14 +464,14 @@ export default function TacticsPage() {
                             {playersOnPitch.map((player) => (
                                 <motion.div
                                     key={player.id}
-                                    drag={!isDrawMode}
+                                    drag={isAdmin && !isDrawMode}
                                     dragConstraints={constraintsRef}
                                     dragElastic={0}
                                     dragMomentum={false}
                                     initial={{ left: `${player.x}%`, top: `${player.y}%` }}
                                     className={cn(
                                         "absolute w-12 h-12 -ml-6 -mt-6 rounded-full border-2 border-white flex flex-col items-center justify-center shadow-xl select-none z-30 transition-transform overflow-visible group",
-                                        !isDrawMode ? "cursor-grab active:cursor-grabbing hover:scale-110" : "cursor-default",
+                                        (isAdmin && !isDrawMode) ? "cursor-grab active:cursor-grabbing hover:scale-110" : "cursor-default",
                                         player.color
                                     )}
                                     onDragEnd={(_, info) => {
@@ -469,17 +504,19 @@ export default function TacticsPage() {
                                     </div>
 
                                     {/* Delete indicator */}
-                                    <button
-                                        onPointerDown={(e) => e.stopPropagation()}
-                                        onClick={(e) => {
-                                            e.preventDefault();
-                                            e.stopPropagation();
-                                            removePlayerFromPitch(player.id);
-                                        }}
-                                        className="absolute -top-3 -right-3 w-8 h-8 bg-brand border-2 border-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity z-[100] shadow-xl hover:scale-110 active:scale-95"
-                                    >
-                                        <X className="w-4 h-4 text-white" />
-                                    </button>
+                                    {isAdmin && (
+                                        <button
+                                            onPointerDown={(e) => e.stopPropagation()}
+                                            onClick={(e) => {
+                                                e.preventDefault();
+                                                e.stopPropagation();
+                                                removePlayerFromPitch(player.id);
+                                            }}
+                                            className="absolute -top-3 -right-3 w-8 h-8 bg-brand border-2 border-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity z-[100] shadow-xl hover:scale-110 active:scale-95"
+                                        >
+                                            <X className="w-4 h-4 text-white" />
+                                        </button>
+                                    )}
                                 </motion.div>
                             ))}
                         </AnimatePresence>
@@ -502,34 +539,70 @@ export default function TacticsPage() {
                             </button>
                         </div>
                         <div className="flex-1 overflow-y-auto p-6 space-y-4 custom-scrollbar">
-                            {savedTactics.map(t => (
-                                <div
-                                    key={t._id}
-                                    onClick={() => loadTactic(t)}
-                                    className="group relative bg-white border border-slate-100 rounded-2xl p-4 cursor-pointer hover:shadow-lg hover:shadow-brand/5 hover:border-brand/20 transition-all"
-                                >
-                                    <div className="flex justify-between items-start mb-2">
-                                        <span className={cn(
-                                            "px-2 py-1 rounded-md text-[8px] font-black uppercase tracking-wide",
-                                            t.mode === "futsal" ? "bg-orange-50 text-orange-500" : "bg-blue-50 text-blue-500"
-                                        )}>
-                                            {t.mode === "futsal" ? "Futsal" : "11v11"}
-                                        </span>
-                                        {isAdmin && (
-                                            <button
-                                                onClick={(e) => deleteSavedTactic(t._id!, e)}
-                                                className="p-1.5 hover:bg-red-50 text-slate-300 hover:text-red-500 rounded-lg transition-colors"
-                                            >
-                                                <Trash2 className="w-3.5 h-3.5" />
-                                            </button>
+                            {savedTactics
+                                .filter(t => t.mode === mode)
+                                .map(t => (
+                                    <div
+                                        key={t._id}
+                                        onClick={() => !editingTacticId && loadTactic(t)}
+                                        className={cn(
+                                            "group relative bg-white border border-slate-100 rounded-2xl p-4 transition-all",
+                                            !editingTacticId ? "cursor-pointer hover:shadow-lg hover:shadow-brand/5 hover:border-brand/20" : ""
+                                        )}
+                                    >
+                                        <div className="flex justify-between items-start mb-2">
+                                            <span className={cn(
+                                                "px-2 py-1 rounded-md text-[8px] font-black uppercase tracking-wide",
+                                                t.mode === "futsal" ? "bg-orange-50 text-orange-500" : "bg-blue-50 text-blue-500"
+                                            )}>
+                                                {t.mode === "futsal" ? "Futsal" : "11v11"}
+                                            </span>
+                                            {isAdmin && !editingTacticId && (
+                                                <div className="flex gap-1">
+                                                    <button
+                                                        onClick={(e) => startEditingTactic(t, e)}
+                                                        className="p-1.5 hover:bg-slate-100 text-slate-300 hover:text-brand rounded-lg transition-colors"
+                                                    >
+                                                        <Pencil className="w-3.5 h-3.5" />
+                                                    </button>
+                                                    <button
+                                                        onClick={(e) => deleteSavedTactic(t._id!, e)}
+                                                        className="p-1.5 hover:bg-red-50 text-slate-300 hover:text-red-500 rounded-lg transition-colors"
+                                                    >
+                                                        <Trash2 className="w-3.5 h-3.5" />
+                                                    </button>
+                                                </div>
+                                            )}
+                                        </div>
+
+                                        {editingTacticId === t._id ? (
+                                            <div className="mt-2 space-y-2" onClick={e => e.stopPropagation()}>
+                                                <input
+                                                    type="text"
+                                                    value={editName}
+                                                    onChange={(e) => setEditName(e.target.value)}
+                                                    className="w-full bg-slate-50 border border-slate-200 rounded-lg px-2 py-1 text-sm font-bold focus:outline-none focus:border-brand/30"
+                                                    autoFocus
+                                                />
+                                                <div className="flex gap-2">
+                                                    <button onClick={saveTacticName} className="px-3 py-1 bg-brand text-white text-[10px] font-bold rounded-md uppercase tracking-wide">
+                                                        Speichern
+                                                    </button>
+                                                    <button onClick={cancelEditingTactic} className="px-3 py-1 bg-slate-100 text-slate-500 text-[10px] font-bold rounded-md uppercase tracking-wide">
+                                                        Abbrechen
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        ) : (
+                                            <>
+                                                <h4 className="font-bold text-slate-900 text-sm mb-1">{t.name}</h4>
+                                                <p className="text-[10px] text-slate-400 font-medium">
+                                                    {new Date(t.createdAt!).toLocaleDateString('de-DE')}
+                                                </p>
+                                            </>
                                         )}
                                     </div>
-                                    <h4 className="font-bold text-slate-900 text-sm mb-1">{t.name}</h4>
-                                    <p className="text-[10px] text-slate-400 font-medium">
-                                        {new Date(t.createdAt!).toLocaleDateString('de-DE')}
-                                    </p>
-                                </div>
-                            ))}
+                                ))}
                         </div>
                     </div>
 
@@ -660,7 +733,7 @@ export default function TacticsPage() {
                                 </div>
 
                                 <div className="flex-1 overflow-y-auto space-y-4 pr-2 custom-scrollbar">
-                                    {savedTactics.length === 0 ? (
+                                    {savedTactics.filter(t => t.mode === mode).length === 0 ? (
                                         <div className="text-center py-16 text-slate-300">
                                             <div className="w-20 h-20 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-6 shadow-inner">
                                                 <Download className="w-8 h-8" />
@@ -668,37 +741,41 @@ export default function TacticsPage() {
                                             <p className="font-black uppercase text-[10px] tracking-widest">Noch keine Taktiken gespeichert.</p>
                                         </div>
                                     ) : (
-                                        savedTactics.map(t => (
-                                            <div
-                                                key={t._id}
-                                                onClick={() => loadTactic(t)}
-                                                className="group flex items-center justify-between p-6 bg-white border border-slate-100 rounded-3xl hover:shadow-xl hover:shadow-brand/5 hover:border-brand/20 cursor-pointer transition-all shadow-sm"
-                                            >
-                                                <div className="flex items-center gap-6">
-                                                    <div className={cn(
-                                                        "w-14 h-14 rounded-2xl flex items-center justify-center font-black text-[10px] p-2 text-center shadow-inner uppercase tracking-tighter",
-                                                        t.mode === "futsal" ? "bg-orange-50 text-orange-500" : "bg-blue-50 text-blue-500"
-                                                    )}>
-                                                        {t.mode === "futsal" ? "Futsal" : "11v11"}
+                                        savedTactics
+                                            .filter(t => t.mode === mode)
+                                            .map(t => (
+                                                <div
+                                                    key={t._id}
+                                                    onClick={() => loadTactic(t)}
+                                                    className="group flex items-center justify-between p-6 bg-white border border-slate-100 rounded-3xl hover:shadow-xl hover:shadow-brand/5 hover:border-brand/20 cursor-pointer transition-all shadow-sm"
+                                                >
+                                                    <div className="flex items-center gap-6">
+                                                        <div className={cn(
+                                                            "w-14 h-14 rounded-2xl flex items-center justify-center font-black text-[10px] p-2 text-center shadow-inner uppercase tracking-tighter",
+                                                            t.mode === "futsal" ? "bg-orange-50 text-orange-500" : "bg-blue-50 text-blue-500"
+                                                        )}>
+                                                            {t.mode === "futsal" ? "Futsal" : "11v11"}
+                                                        </div>
+                                                        <div>
+                                                            <h3 className="font-black text-slate-900 text-lg tracking-tight">{t.name}</h3>
+                                                            <p className="text-[10px] text-slate-400 font-black uppercase tracking-widest">
+                                                                {t.players.length} Spieler • {new Date(t.createdAt!).toLocaleDateString('de-DE')}
+                                                            </p>
+                                                        </div>
                                                     </div>
-                                                    <div>
-                                                        <h3 className="font-black text-slate-900 text-lg tracking-tight">{t.name}</h3>
-                                                        <p className="text-[10px] text-slate-400 font-black uppercase tracking-widest">
-                                                            {t.players.length} Spieler • {new Date(t.createdAt!).toLocaleDateString('de-DE')}
-                                                        </p>
+                                                    <div className="flex items-center gap-4">
+                                                        {isAdmin && (
+                                                            <button
+                                                                onClick={(e) => deleteSavedTactic(t._id!, e)}
+                                                                className="p-3 bg-white border border-slate-100 shadow-sm hover:bg-brand hover:text-white rounded-xl transition-all opacity-0 group-hover:opacity-100"
+                                                            >
+                                                                <Trash2 className="w-4 h-4" />
+                                                            </button>
+                                                        )}
+                                                        <ChevronRight className="w-6 h-6 text-slate-200 group-hover:text-brand transition-colors" />
                                                     </div>
                                                 </div>
-                                                <div className="flex items-center gap-4">
-                                                    <button
-                                                        onClick={(e) => deleteSavedTactic(t._id!, e)}
-                                                        className="p-3 bg-white border border-slate-100 shadow-sm hover:bg-brand hover:text-white rounded-xl transition-all opacity-0 group-hover:opacity-100"
-                                                    >
-                                                        <Trash2 className="w-4 h-4" />
-                                                    </button>
-                                                    <ChevronRight className="w-6 h-6 text-slate-200 group-hover:text-brand transition-colors" />
-                                                </div>
-                                            </div>
-                                        ))
+                                            ))
                                     )}
                                 </div>
                             </motion.div>

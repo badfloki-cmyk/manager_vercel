@@ -29,6 +29,11 @@ export const createTactic = async (data: TacticData) => {
     return response.data;
 };
 
+export const updateTactic = async (id: string, data: Partial<TacticData>) => {
+    const response = await api.put(`/tactics/${id}`, data);
+    return response.data;
+};
+
 export const deleteTactic = async (id: string) => {
     const response = await api.delete(`/tactics/${id}`);
     return response.data;

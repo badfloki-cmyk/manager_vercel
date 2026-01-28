@@ -39,7 +39,7 @@ const features = [
     color: "bg-brand/10 text-brand",
   },
   {
-    title: "Kommunikation",
+    title: "Nachrichten",
     description: "Interne Nachrichten und Datei-Austausch für alle Teams.",
     icon: MessageSquare,
     href: "/messages",
@@ -124,10 +124,10 @@ export default function Home() {
               Angemeldet als: <span className="ml-1.5 font-black uppercase text-[10px]">{session?.user?.name} ({isAdmin ? 'Admin' : 'Spieler'})</span>
             </div>
             <h1 className="text-4xl font-black tracking-tight sm:text-7xl text-brand mb-4">
-              Vereinsverwaltung auf dem <br /> nächsten Level.
+              Verwaltungstool <br /> Schulfussball KGS-Pattensen.
             </h1>
             <p className="mt-8 text-xl leading-8 text-slate-600 max-w-2xl mx-auto font-medium">
-              Verwalte deine 1. und 2. Mannschaft der ERS Pattensen mit einem professionellen System für Kader,
+              Verwalten der 1. und 2. Mannschaft der KGS Pattensen mit einem professionellen System für Kader,
               Taktik und Performance.
             </p>
 

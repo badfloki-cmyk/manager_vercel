@@ -58,7 +58,7 @@ export default function LoginPage() {
                         className="mx-auto h-16 w-auto mb-8 drop-shadow-sm"
                         priority
                     />
-                    <h1 className="text-3xl font-black text-slate-900 tracking-tight mb-2">Club Manager</h1>
+                    <h1 className="text-3xl font-black text-slate-900 tracking-tight mb-2">Schulfussball Management</h1>
                     <p className="text-slate-400 font-bold uppercase text-[10px] tracking-widest">Bitte melden Sie sich an, um fortzufahren</p>
                 </div>
 
