@@ -4,12 +4,13 @@ import Player from '@/models/Player';
 
 export async function PUT(
     request: Request,
-    { params }: { params: { id: string } }
+    { params }: { params: Promise<{ id: string }> }
 ) {
     try {
         await connectDB();
+        const { id } = await params;
         const body = await request.json();
-        const player = await Player.findByIdAndUpdate(params.id, body, { new: true });
+        const player = await Player.findByIdAndUpdate(id, body, { new: true });
 
         if (!player) {
             return NextResponse.json({ success: false, message: 'Player not found' }, { status: 404 });
@@ -23,11 +24,12 @@ export async function PUT(
 
 export async function DELETE(
     request: Request,
-    { params }: { params: { id: string } }
+    { params }: { params: Promise<{ id: string }> }
 ) {
     try {
         await connectDB();
-        const player = await Player.findByIdAndDelete(params.id);
+        const { id } = await params;
+        const player = await Player.findByIdAndDelete(id);
 
         if (!player) {
             return NextResponse.json({ success: false, message: 'Player not found' }, { status: 404 });
