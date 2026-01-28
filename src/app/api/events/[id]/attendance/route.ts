@@ -16,7 +16,7 @@ export async function POST(
         }
 
         const attendanceIndex = event.attendance.findIndex(
-            (a: any) => a.player.toString() === playerId
+            (a) => a.player.toString() === playerId
         );
 
         if (attendanceIndex > -1) {
