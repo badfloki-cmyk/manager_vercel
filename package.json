@@ -1,7 +1,7 @@
 {
   "name": "club-manager",
-  "version": "1.1.0",
-  "comment": "Final structural stabilization - Type aligned form logic",
+  "version": "1.1.1",
+  "comment": "Critical Security Patch - Next.js v15.2.0 Upgrade",
   "private": true,
   "scripts": {
     "dev": "next dev",
@@ -10,7 +10,7 @@
     "lint": "eslint"
   },
   "dependencies": {
-    "next": "15.1.7",
+    "next": "^15.2.1",
     "react": "19.0.0",
     "react-dom": "19.0.0",
     "axios": "^1.7.9",
