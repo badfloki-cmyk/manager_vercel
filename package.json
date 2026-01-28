@@ -1,7 +1,7 @@
 {
   "name": "club-manager",
-  "version": "1.0.1",
-  "comment": "Ultimative build stabilization - Lint & Type fixes",
+  "version": "1.1.0",
+  "comment": "Final structural stabilization - Type aligned form logic",
   "private": true,
   "scripts": {
     "dev": "next dev",

@@ -28,8 +28,8 @@ export default function SquadPage() {
         lastName: string;
         number: string;
         position: string;
-        status: "Active" | "Inactive";
-        role: "Regular" | "Captain" | "Staff";
+        status: 'Active' | 'Injured' | 'Away';
+        role: 'Captain' | 'Regular';
     }>({
         firstName: "",
         lastName: "",
@@ -306,6 +306,32 @@ export default function SquadPage() {
                                             <option>Abwehr</option>
                                             <option>Mittelfeld</option>
                                             <option>Sturm</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div className="space-y-1.5">
+                                        <label className="text-xs font-bold text-slate-500 uppercase px-1">Status</label>
+                                        <select
+                                            value={newPlayer.status}
+                                            onChange={(e) => setNewPlayer({ ...newPlayer, status: e.target.value as 'Active' | 'Injured' | 'Away' })}
+                                            className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 focus:outline-none focus:border-red-500/50 transition-colors text-sm"
+                                        >
+                                            <option value="Active">Aktiv</option>
+                                            <option value="Injured">Verletzt</option>
+                                            <option value="Away">Abwesend</option>
+                                        </select>
+                                    </div>
+                                    <div className="space-y-1.5">
+                                        <label className="text-xs font-bold text-slate-500 uppercase px-1">Rolle</label>
+                                        <select
+                                            value={newPlayer.role}
+                                            onChange={(e) => setNewPlayer({ ...newPlayer, role: e.target.value as 'Captain' | 'Regular' })}
+                                            className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 focus:outline-none focus:border-red-500/50 transition-colors text-sm"
+                                        >
+                                            <option value="Regular">Normal</option>
+                                            <option value="Captain">Kapitän</option>
                                         </select>
                                     </div>
                                 </div>
