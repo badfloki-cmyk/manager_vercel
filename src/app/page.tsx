@@ -6,7 +6,6 @@ import { motion } from "framer-motion";
 import {
   Users,
   Calendar as CalendarIcon,
-  Trophy,
   LayoutDashboard,
   MessageSquare,
   Settings
