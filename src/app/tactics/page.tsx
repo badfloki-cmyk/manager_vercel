@@ -8,7 +8,8 @@ import {
     Trash2,
     RotateCcw,
     LayoutDashboard,
-    Users
+    Users,
+    Plus
 } from "lucide-react";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
