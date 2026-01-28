@@ -16,28 +16,73 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
-import { getPlayers, Player } from "@/lib/squad";
+import { getPlayers, createPlayer, deletePlayer, Player } from "@/lib/squad";
 
 export default function SquadPage() {
     const [team, setTeam] = useState<"1. Mannschaft" | "2. Mannschaft">("1. Mannschaft");
     const [players, setPlayers] = useState<Player[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState("");
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [isSubmitting, setIsSubmitting] = useState(false);
+
+    // New Player Form State
+    const [newPlayer, setNewPlayer] = useState({
+        firstName: "",
+        lastName: "",
+        number: "",
+        position: "Sturm",
+        status: "Active" as const,
+        role: "Regular" as const,
+    });
+
+    const loadPlayers = async () => {
+        setIsLoading(true);
+        try {
+            const { players: fetchedPlayers } = await getPlayers(team);
+            setPlayers(fetchedPlayers || []);
+        } catch (error) {
+            console.error("Failed to load players:", error);
+        } finally {
+            setIsLoading(false);
+        }
+    };
 
     useEffect(() => {
-        const loadPlayers = async () => {
-            setIsLoading(true);
-            try {
-                const { players: fetchedPlayers } = await getPlayers(team);
-                setPlayers(fetchedPlayers || []);
-            } catch (error) {
-                console.error("Failed to load players:", error);
-            } finally {
-                setIsLoading(false);
-            }
-        };
         loadPlayers();
     }, [team]);
+
+    const handleAddPlayer = async (e: React.FormEvent) => {
+        e.preventDefault();
+        setIsSubmitting(true);
+        try {
+            await createPlayer({
+                ...newPlayer,
+                number: parseInt(newPlayer.number),
+                team: team,
+                stats: { goals: 0, assists: 0, appearances: 0 }
+            });
+            setIsModalOpen(false);
+            setNewPlayer({ firstName: "", lastName: "", number: "", position: "Sturm", status: "Active", role: "Regular" });
+            loadPlayers();
+        } catch (error) {
+            console.error("Error creating player:", error);
+            alert("Fehler beim Erstellen des Spielers.");
+        } finally {
+            setIsSubmitting(false);
+        }
+    };
+
+    const handleDeletePlayer = async (id: string) => {
+        if (!confirm("Spieler wirklich löschen?")) return;
+        try {
+            await deletePlayer(id);
+            loadPlayers();
+        } catch (error) {
+            console.error("Error deleting player:", error);
+            alert("Fehler beim Löschen des Spielers.");
+        }
+    };
 
     const filteredPlayers = players.filter(p =>
         `${p.firstName} ${p.lastName}`.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -91,7 +136,10 @@ export default function SquadPage() {
                             className="w-full bg-slate-900 border border-slate-800 rounded-xl py-2.5 pl-10 pr-4 text-sm focus:outline-none focus:border-red-500/50 transition-colors"
                         />
                     </div>
-                    <button className="w-full md:w-auto flex items-center justify-center gap-2 bg-red-600 hover:bg-red-700 text-white px-6 py-2.5 rounded-xl font-medium transition-all active:scale-95 shadow-lg shadow-red-600/10">
+                    <button
+                        onClick={() => setIsModalOpen(true)}
+                        className="w-full md:w-auto flex items-center justify-center gap-2 bg-red-600 hover:bg-red-700 text-white px-6 py-2.5 rounded-xl font-medium transition-all active:scale-95 shadow-lg shadow-red-600/10"
+                    >
                         <UserPlus className="w-4 h-4" />
                         Neuer Spieler
                     </button>
@@ -105,15 +153,15 @@ export default function SquadPage() {
                     </div>
                     <div className="bg-slate-900/50 border border-slate-800 p-6 rounded-2xl">
                         <p className="text-slate-500 text-sm mb-1">Top Torschütze</p>
-                        <h3 className="text-2xl font-bold">L. Schmidt (8)</h3>
+                        <h3 className="text-2xl font-bold">In Analyse...</h3>
                     </div>
                     <div className="bg-slate-900/50 border border-slate-800 p-6 rounded-2xl">
                         <p className="text-slate-500 text-sm mb-1">Nächstes Spiel</p>
-                        <h3 className="text-2xl font-bold">Sa. 14:00 Uhr</h3>
+                        <h3 className="text-2xl font-bold">In Kürze</h3>
                     </div>
                     <div className="bg-slate-900/50 border border-slate-800 p-6 rounded-2xl">
                         <p className="text-slate-500 text-sm mb-1">Verfügbarkeit</p>
-                        <h3 className="text-2xl font-bold text-emerald-400">92%</h3>
+                        <h3 className="text-2xl font-bold text-emerald-400">Bereit</h3>
                     </div>
                 </div>
 
@@ -171,7 +219,10 @@ export default function SquadPage() {
                                         </div>
                                     </div>
 
-                                    <button className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 p-2 hover:bg-red-500/10 hover:text-red-500 rounded-lg transition-all">
+                                    <button
+                                        onClick={() => handleDeletePlayer(player._id)}
+                                        className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 p-2 hover:bg-red-500/10 hover:text-red-500 rounded-lg transition-all"
+                                    >
                                         <Trash2 className="w-4 h-4" />
                                     </button>
                                 </motion.div>
@@ -187,6 +238,96 @@ export default function SquadPage() {
                     </div>
                 )}
             </main>
+
+            {/* Add Player Modal */}
+            <AnimatePresence>
+                {isModalOpen && (
+                    <div className="fixed inset-0 z-[100] flex items-center justify-center p-6">
+                        <motion.div
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            onClick={() => setIsModalOpen(false)}
+                            className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+                        />
+                        <motion.div
+                            initial={{ opacity: 0, scale: 0.95, y: 20 }}
+                            animate={{ opacity: 1, scale: 1, y: 0 }}
+                            exit={{ opacity: 0, scale: 0.95, y: 20 }}
+                            className="relative w-full max-w-lg bg-slate-900 border border-slate-800 rounded-3xl p-8 shadow-2xl"
+                        >
+                            <h2 className="text-2xl font-bold mb-6">Neuer Spieler ({team})</h2>
+                            <form onSubmit={handleAddPlayer} className="space-y-4">
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div className="space-y-1.5">
+                                        <label className="text-xs font-bold text-slate-500 uppercase px-1">Vorname</label>
+                                        <input
+                                            required
+                                            type="text"
+                                            value={newPlayer.firstName}
+                                            onChange={(e) => setNewPlayer({ ...newPlayer, firstName: e.target.value })}
+                                            className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 focus:outline-none focus:border-red-500/50 transition-colors text-sm"
+                                        />
+                                    </div>
+                                    <div className="space-y-1.5">
+                                        <label className="text-xs font-bold text-slate-500 uppercase px-1">Nachname</label>
+                                        <input
+                                            required
+                                            type="text"
+                                            value={newPlayer.lastName}
+                                            onChange={(e) => setNewPlayer({ ...newPlayer, lastName: e.target.value })}
+                                            className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 focus:outline-none focus:border-red-500/50 transition-colors text-sm"
+                                        />
+                                    </div>
+                                </div>
+
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div className="space-y-1.5">
+                                        <label className="text-xs font-bold text-slate-500 uppercase px-1">Nummer</label>
+                                        <input
+                                            required
+                                            type="number"
+                                            value={newPlayer.number}
+                                            onChange={(e) => setNewPlayer({ ...newPlayer, number: e.target.value })}
+                                            className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 focus:outline-none focus:border-red-500/50 transition-colors text-sm"
+                                        />
+                                    </div>
+                                    <div className="space-y-1.5">
+                                        <label className="text-xs font-bold text-slate-500 uppercase px-1">Position</label>
+                                        <select
+                                            value={newPlayer.position}
+                                            onChange={(e) => setNewPlayer({ ...newPlayer, position: e.target.value })}
+                                            className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 focus:outline-none focus:border-red-500/50 transition-colors text-sm"
+                                        >
+                                            <option>Torwart</option>
+                                            <option>Abwehr</option>
+                                            <option>Mittelfeld</option>
+                                            <option>Sturm</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div className="flex gap-4 pt-6">
+                                    <button
+                                        type="button"
+                                        onClick={() => setIsModalOpen(false)}
+                                        className="flex-1 px-6 py-2.5 rounded-xl border border-slate-800 hover:bg-slate-800 transition-colors font-medium text-sm"
+                                    >
+                                        Abbrechen
+                                    </button>
+                                    <button
+                                        disabled={isSubmitting}
+                                        type="submit"
+                                        className="flex-1 bg-red-600 hover:bg-red-700 text-white px-6 py-2.5 rounded-xl font-medium transition-all active:scale-95 shadow-lg shadow-red-600/10 text-sm disabled:opacity-50"
+                                    >
+                                        {isSubmitting ? "Wird gespeichert..." : "Speichern"}
+                                    </button>
+                                </div>
+                            </form>
+                        </motion.div>
+                    </div>
+                )}
+            </AnimatePresence>
         </div>
     );
 }
