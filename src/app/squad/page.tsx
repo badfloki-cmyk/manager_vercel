@@ -7,10 +7,14 @@ import {
     Trash2,
     UserPlus,
     Search,
-    ArrowLeft
+    ArrowLeft,
+    Camera,
+    Upload
 } from "lucide-react";
-import { useCallback } from "react";
+import { useCallback, useRef } from "react";
+import React from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { cn } from "@/lib/utils";
 import { getPlayers, createPlayer, deletePlayer, Player } from "@/lib/squad";
 
@@ -30,6 +34,7 @@ export default function SquadPage() {
         position: string;
         status: 'Active' | 'Injured' | 'Away';
         role: 'Captain' | 'Regular';
+        photoUrl?: string;
     }>({
         firstName: "",
         lastName: "",
@@ -37,7 +42,12 @@ export default function SquadPage() {
         position: "Sturm",
         status: "Active",
         role: "Regular",
+        photoUrl: "",
     });
+
+    const [selectedFile, setSelectedFile] = useState<File | null>(null);
+    const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+    const fileInputRef = useRef<HTMLInputElement>(null);
 
     const loadPlayers = useCallback(async () => {
         setIsLoading(true);
@@ -55,18 +65,40 @@ export default function SquadPage() {
         loadPlayers();
     }, [loadPlayers]);
 
+    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (file) {
+            setSelectedFile(file);
+            const url = URL.createObjectURL(file);
+            setPreviewUrl(url);
+        }
+    };
+
     const handleAddPlayer = async (e: React.FormEvent) => {
         e.preventDefault();
         setIsSubmitting(true);
         try {
+            let photoUrl = "";
+            if (selectedFile) {
+                const response = await fetch(`/api/upload?filename=${selectedFile.name}`, {
+                    method: 'POST',
+                    body: selectedFile,
+                });
+                const blob = await response.json();
+                photoUrl = blob.url;
+            }
+
             await createPlayer({
                 ...newPlayer,
                 number: parseInt(newPlayer.number),
                 team: team,
+                photoUrl: photoUrl,
                 stats: { goals: 0, assists: 0, appearances: 0 }
             });
             setIsModalOpen(false);
-            setNewPlayer({ firstName: "", lastName: "", number: "", position: "Sturm", status: "Active", role: "Regular" });
+            setNewPlayer({ firstName: "", lastName: "", number: "", position: "Sturm", status: "Active", role: "Regular", photoUrl: "" });
+            setSelectedFile(null);
+            setPreviewUrl(null);
             loadPlayers();
         } catch (error) {
             console.error("Error creating player:", error);
@@ -187,8 +219,17 @@ export default function SquadPage() {
                                 >
                                     <div className="flex items-start justify-between mb-4">
                                         <div className="flex items-center gap-4">
-                                            <div className="w-14 h-14 rounded-xl bg-slate-800 flex items-center justify-center text-xl font-bold text-red-500 overflow-hidden">
-                                                {player.number}
+                                            <div className="w-14 h-14 rounded-xl bg-slate-800 flex items-center justify-center text-xl font-bold text-red-500 overflow-hidden relative border border-slate-700">
+                                                {player.photoUrl ? (
+                                                    <Image
+                                                        src={player.photoUrl}
+                                                        alt={`${player.firstName} ${player.lastName}`}
+                                                        fill
+                                                        className="object-cover"
+                                                    />
+                                                ) : (
+                                                    player.number
+                                                )}
                                             </div>
                                             <div>
                                                 <h3 className="font-bold text-lg leading-snug">
@@ -260,8 +301,35 @@ export default function SquadPage() {
                             className="relative w-full max-w-lg bg-slate-900 border border-slate-800 rounded-3xl p-8 shadow-2xl"
                         >
                             <h2 className="text-2xl font-bold mb-6">Neuer Spieler ({team})</h2>
-                            <form onSubmit={handleAddPlayer} className="space-y-4">
-                                <div className="grid grid-cols-2 gap-4">
+                            <form onSubmit={handleAddPlayer} className="space-y-6">
+                                {/* Photo Upload */}
+                                <div className="flex justify-center">
+                                    <div
+                                        onClick={() => fileInputRef.current?.click()}
+                                        className="relative w-24 h-24 rounded-2xl bg-slate-950 border-2 border-dashed border-slate-800 hover:border-red-500/50 transition-all cursor-pointer group flex items-center justify-center overflow-hidden"
+                                    >
+                                        {previewUrl ? (
+                                            <Image src={previewUrl} alt="Preview" fill className="object-cover" />
+                                        ) : (
+                                            <div className="text-center group-hover:scale-110 transition-transform">
+                                                <Camera className="w-6 h-6 text-slate-600 mx-auto mb-1" />
+                                                <span className="text-[10px] font-bold text-slate-500 uppercase">Foto</span>
+                                            </div>
+                                        )}
+                                        <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
+                                            <Upload className="w-5 h-5 text-white" />
+                                        </div>
+                                    </div>
+                                    <input
+                                        type="file"
+                                        ref={fileInputRef}
+                                        onChange={handleFileChange}
+                                        className="hidden"
+                                        accept="image/*"
+                                    />
+                                </div>
+
+                                <div className="space-y-4">
                                     <div className="space-y-1.5">
                                         <label className="text-xs font-bold text-slate-500 uppercase px-1">Vorname</label>
                                         <input
