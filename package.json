@@ -1,6 +1,7 @@
 {
   "name": "club-manager",
-  "version": "0.1.0",
+  "version": "0.1.1",
+  "comment": "Force redeploy for dependency fix",
   "private": true,
   "scripts": {
     "dev": "next dev",
