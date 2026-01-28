@@ -14,6 +14,13 @@ export interface ITactic extends Document {
         photoUrl?: string;
     }[];
     drawingData?: string; // SVG path or JSON string for lines
+    notes?: {
+        id: string;
+        text: string;
+        x: number;
+        y: number;
+        color: string;
+    }[];
 }
 
 const TacticSchema: Schema = new Schema(
@@ -33,6 +40,15 @@ const TacticSchema: Schema = new Schema(
             }
         ],
         drawingData: { type: String },
+        notes: [
+            {
+                id: { type: String, required: true },
+                text: { type: String, required: true },
+                x: { type: Number, required: true },
+                y: { type: Number, required: true },
+                color: { type: String, required: true },
+            }
+        ]
     },
     { timestamps: true }
 );

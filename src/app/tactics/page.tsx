@@ -15,7 +15,8 @@ import {
     X,
     Check,
     ChevronRight,
-    Search
+    Search,
+    Type
 } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
@@ -68,6 +69,11 @@ export default function TacticsPage() {
     const [paths, setPaths] = useState<Path[]>([]);
     const [currentPath, setCurrentPath] = useState<Path | null>(null);
     const [drawColor, setDrawColor] = useState("#d4006d"); // KGS Pink
+
+    // Notes Logic
+    const [notes, setNotes] = useState<{ id: string, text: string, x: number, y: number, color: string }[]>([]);
+    const [isNoteMode, setIsNoteMode] = useState(false);
+    const [editingNoteId, setEditingNoteId] = useState<string | null>(null);
 
     const constraintsRef = useRef<HTMLDivElement>(null);
     const svgRef = useRef<SVGSVGElement>(null);
@@ -123,6 +129,37 @@ export default function TacticsPage() {
         }
     };
 
+    // Note Handlers
+    const addNote = (e: React.MouseEvent | React.TouchEvent) => {
+        if (isNoteMode && svgRef.current) {
+            const rect = svgRef.current.getBoundingClientRect();
+            const x = (('touches' in e ? e.touches[0].clientX : e.clientX) - rect.left) / rect.width * 100;
+            const y = (('touches' in e ? e.touches[0].clientY : e.clientY) - rect.top) / rect.height * 100;
+
+            const newNote = {
+                id: Date.now().toString(),
+                text: "Neue Notiz",
+                x,
+                y,
+                color: drawColor
+            };
+            setNotes(prev => [...prev, newNote]);
+            setEditingNoteId(newNote.id);
+            setIsNoteMode(false); // Switch back to select mode after placing
+        }
+    };
+
+    const updateNoteText = (id: string, text: string) => {
+        setNotes(prev => prev.map(n => n.id === id ? { ...n, text } : n));
+    };
+
+    const deleteNote = (id: string, e: React.MouseEvent) => {
+        e.stopPropagation();
+        if (confirm("Notiz löschen?")) {
+            setNotes(prev => prev.filter(n => n.id !== id));
+        }
+    };
+
     // Tactic Actions
     const handleSaveTactic = async () => {
         if (!tacticName) return;
@@ -133,7 +170,8 @@ export default function TacticsPage() {
                 mode,
                 formation: "Custom",
                 players: playersOnPitch,
-                drawingData: JSON.stringify(paths)
+                drawingData: JSON.stringify(paths),
+                notes: notes
             };
             await createTactic(data);
             const { tactics } = await getTactics();
@@ -151,6 +189,7 @@ export default function TacticsPage() {
         setMode(tactic.mode);
         setPlayersOnPitch(tactic.players);
         setPaths(tactic.drawingData ? JSON.parse(tactic.drawingData) : []);
+        setNotes(tactic.notes || []);
         setShowLoadModal(false);
     };
 
@@ -215,6 +254,7 @@ export default function TacticsPage() {
         if (confirm("Spielfeld wirklich leeren?")) {
             setPlayersOnPitch([]);
             setPaths([]);
+            setNotes([]);
         }
     };
 
@@ -431,7 +471,60 @@ export default function TacticsPage() {
                             onTouchStart={startDrawing}
                             onTouchMove={draw}
                             onTouchEnd={stopDrawing}
+                            onClick={addNote}
                         >
+                            {/* Notes Layer */}
+                            {notes.map(note => (
+                                <foreignObject
+                                    key={note.id}
+                                    x={`${note.x}%`}
+                                    y={`${note.y}%`}
+                                    width="150"
+                                    height="100"
+                                    className="overflow-visible"
+                                    style={{ transform: 'translate(-50%, -50%)' }}
+                                >
+                                    <div className="relative group">
+                                        {editingNoteId === note.id ? (
+                                            <textarea
+                                                autoFocus
+                                                value={note.text}
+                                                onChange={(e) => updateNoteText(note.id, e.target.value)}
+                                                onBlur={() => setEditingNoteId(null)}
+                                                className="w-40 bg-white/90 backdrop-blur border-2 border-brand rounded-xl p-2 text-xs font-bold shadow-xl focus:outline-none resize-none"
+                                                style={{ color: note.color === '#ffffff' ? '#000000' : note.color }}
+                                            />
+                                        ) : (
+                                            <div
+                                                onDoubleClick={(e) => {
+                                                    if (!isAdmin) return;
+                                                    e.stopPropagation();
+                                                    setEditingNoteId(note.id);
+                                                }}
+                                                className={cn(
+                                                    "px-3 py-1.5 rounded-xl text-xs font-black shadow-sm border border-white/20 backdrop-blur-sm select-none transition-all",
+                                                    isAdmin ? "cursor-grab active:cursor-grabbing hover:scale-105" : "cursor-default"
+                                                )}
+                                                style={{
+                                                    backgroundColor: note.color === '#ffffff' ? '#ffffff' : note.color,
+                                                    color: note.color === '#ffffff' ? '#000000' : '#ffffff'
+                                                }}
+                                            >
+                                                {note.text}
+                                                {isAdmin && (
+                                                    <button
+                                                        onClick={(e) => deleteNote(note.id, e)}
+                                                        className="absolute -top-2 -right-2 bg-white text-red-500 rounded-full p-0.5 shadow-md opacity-0 group-hover:opacity-100 transition-opacity"
+                                                    >
+                                                        <X className="w-3 h-3" />
+                                                    </button>
+                                                )}
+                                            </div>
+                                        )}
+                                    </div>
+                                </foreignObject>
+                            ))}
+
                             <AnimatePresence>
                                 {paths.map(path => (
                                     <motion.path
