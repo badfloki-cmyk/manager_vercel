@@ -39,22 +39,22 @@ export const PlayerCard: React.FC<PlayerCardProps> = ({ player, className }) => 
 
     const getThemeColors = (rating: number) => {
         if (rating >= 85) return {
-            bg: "from-[#FBF2C4] via-[#F6D242] to-[#D4AF37]",
-            border: "border-[#D4AF37]",
-            text: "text-[#4D3F1E]",
-            accent: "bg-[#4D3F1E]/10"
+            bg: "from-[#d4006d] via-[#a00052] to-[#1e1b4b]",
+            text: "text-white",
+            accent: "bg-white/20",
+            border: "border-white/30"
         };
         if (rating >= 75) return {
-            bg: "from-[#F3F4F6] via-[#D1D5DB] to-[#9CA3AF]",
-            border: "border-[#9CA3AF]",
-            text: "text-[#1F2937]",
-            accent: "bg-[#1F2937]/10"
+            bg: "from-[#1e1b4b] via-[#312e81] to-[#4338ca]",
+            text: "text-white",
+            accent: "bg-white/10",
+            border: "border-white/20"
         };
         return {
-            bg: "from-[#E3A678] via-[#CD7F32] to-[#8B4513]",
-            border: "border-[#8B4513]",
-            text: "text-[#2D1B0E]",
-            accent: "bg-[#2D1B0E]/10"
+            bg: "from-white via-slate-50 to-slate-200",
+            text: "text-[#1e1b4b]",
+            accent: "bg-[#d4006d]/10",
+            border: "border-[#d4006d]/20"
         };
     };
 
@@ -71,16 +71,17 @@ export const PlayerCard: React.FC<PlayerCardProps> = ({ player, className }) => 
                 clipPath: "polygon(10% 0, 90% 0, 100% 15%, 100% 88%, 50% 100%, 0 88%, 0 15%)"
             }}
             className={cn(
-                "group relative w-64 h-[380px] overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.3)] transition-all duration-500 bg-gradient-to-br",
+                "group relative w-64 h-[380px] overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.15)] transition-all duration-500 bg-gradient-to-br border",
                 theme.bg,
+                theme.border,
                 className
             )}
         >
             {/* Texture Overlay */}
-            <div className="absolute inset-0 opacity-[0.1] bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] pointer-events-none mix-blend-overlay" />
+            <div className="absolute inset-0 opacity-[0.05] bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] pointer-events-none mix-blend-overlay" />
 
             {/* Radial Shine */}
-            <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_30%,rgba(255,255,255,0.4)_0%,transparent_70%)] pointer-events-none" />
+            <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_30%,rgba(255,255,255,0.2)_0%,transparent_70%)] pointer-events-none" />
 
             {/* Content Container */}
             <div className="relative h-full flex flex-col pt-12 px-4 text-center">
@@ -110,7 +111,7 @@ export const PlayerCard: React.FC<PlayerCardProps> = ({ player, className }) => 
                                 src={player.photoUrl}
                                 alt={player.lastName}
                                 fill
-                                className="object-cover object-top drop-shadow-[0_10px_10px_rgba(0,0,0,0.3)] contrast-[1.05] saturate-[1.1]"
+                                className="object-cover object-top drop-shadow-[0_10px_10px_rgba(0,0,0,0.2)] contrast-[1.05] saturate-[1.1]"
                             />
                         ) : (
                             <div className="w-full h-full flex items-center justify-center opacity-20">
@@ -121,7 +122,7 @@ export const PlayerCard: React.FC<PlayerCardProps> = ({ player, className }) => 
                 </div>
 
                 {/* Name Plate */}
-                <div className="mt-[170px] relative z-20">
+                <div className="mt-[180px] relative z-20">
                     <h3 className={cn(
                         "text-3xl font-black uppercase tracking-tighter truncate italic drop-shadow-sm",
                         theme.text
@@ -131,7 +132,7 @@ export const PlayerCard: React.FC<PlayerCardProps> = ({ player, className }) => 
                 </div>
 
                 {/* Divider */}
-                <div className={cn("h-[2px] w-4/5 mx-auto my-2 opacity-20", theme.text === "text-[#F3E5AB]" ? "bg-white" : "bg-black")} />
+                <div className={cn("h-[2px] w-4/5 mx-auto my-2 opacity-20", theme.text.includes("white") ? "bg-white" : "bg-black")} />
 
                 {/* Stats Grid */}
                 <div className={cn(
@@ -171,13 +172,13 @@ export const PlayerCard: React.FC<PlayerCardProps> = ({ player, className }) => 
                 {/* Bottom Section */}
                 <div className="mt-auto pb-6 flex flex-col items-center opacity-60">
                     <div className="flex items-center gap-2 mb-1">
-                        <span className="text-[10px] font-black tracking-widest uppercase">E.R.S. Team</span>
+                        <span className={cn("text-[10px] font-black tracking-widest uppercase", theme.text)}>E.R.S. Team</span>
                     </div>
                 </div>
             </div>
 
             {/* Reflection Shine Effect */}
-            <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full duration-1000 pointer-events-none" />
+            <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full duration-1000 pointer-events-none" />
         </motion.div>
     );
 };
