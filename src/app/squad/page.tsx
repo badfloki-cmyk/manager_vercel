@@ -368,7 +368,7 @@ export default function SquadPage() {
                                 <Users className="w-5 h-5 text-brand" />
                                 Aktive Spieler ({activePlayers.length})
                             </h2>
-                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                                 <AnimatePresence mode="popLayout">
                                     {activePlayers.map((player: Player) => (
                                         <SquadPlayerCard key={player._id} player={player} />
@@ -404,7 +404,7 @@ export default function SquadPage() {
                                         initial={{ opacity: 0, height: 0 }}
                                         animate={{ opacity: 1, height: "auto" }}
                                         exit={{ opacity: 0, height: 0 }}
-                                        className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+                                        className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6"
                                     >
                                         {benchPlayers.map((player: Player) => (
                                             <SquadPlayerCard key={player._id} player={player} />

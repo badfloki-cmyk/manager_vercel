@@ -68,7 +68,7 @@ export const PlayerCard: React.FC<PlayerCardProps> = ({ player, className }) => 
                 rotateY: 10,
                 transition: { duration: 0.4, ease: "easeOut" }
             }}
-            className={cn("relative w-64 h-[380px] drop-shadow-2xl", className)}
+            className={cn("relative w-52 h-[310px] drop-shadow-2xl", className)}
         >
             {/* Outer "Border" Card */}
             <div
@@ -94,17 +94,17 @@ export const PlayerCard: React.FC<PlayerCardProps> = ({ player, className }) => 
 
                         {/* Header: Rating & Position */}
                         <div className={cn(
-                            "absolute left-4 top-10 flex flex-col items-center gap-0 z-20 font-black",
+                            "absolute left-4 top-8 flex flex-col items-center gap-0 z-20 font-black",
                             theme.text
                         )}>
-                            <span className="text-5xl tracking-tighter leading-none">{stats.rating}</span>
-                            <span className="text-lg uppercase tracking-tight opacity-70 border-t border-current w-full mt-1 pt-1">
+                            <span className="text-3xl tracking-tighter leading-none">{stats.rating}</span>
+                            <span className="text-sm uppercase tracking-tight opacity-70 border-t border-current w-full mt-1 pt-1">
                                 {player.position.substring(0, 3)}
                             </span>
                         </div>
 
                         {/* Player Photo Container */}
-                        <div className="absolute right-[-10px] top-6 w-48 h-64 z-10">
+                        <div className="absolute right-[-5px] top-4 w-36 h-48 z-10">
                             <div
                                 className="relative w-full h-full"
                                 style={{
@@ -128,9 +128,9 @@ export const PlayerCard: React.FC<PlayerCardProps> = ({ player, className }) => 
                         </div>
 
                         {/* Name Plate */}
-                        <div className="mt-[180px] relative z-20">
+                        <div className="mt-[135px] relative z-20">
                             <h3 className={cn(
-                                "text-3xl font-black uppercase tracking-tighter truncate italic drop-shadow-sm",
+                                "text-xl font-black uppercase tracking-tighter truncate italic drop-shadow-sm",
                                 theme.text
                             )}>
                                 {player.lastName}
@@ -138,11 +138,11 @@ export const PlayerCard: React.FC<PlayerCardProps> = ({ player, className }) => 
                         </div>
 
                         {/* Divider */}
-                        <div className={cn("h-[2px] w-4/5 mx-auto my-2 opacity-20", theme.text.includes("white") ? "bg-white" : "bg-black")} />
+                        <div className={cn("h-[1px] w-4/5 mx-auto my-1.5 opacity-20", theme.text.includes("white") ? "bg-white" : "bg-black")} />
 
                         {/* Stats Grid */}
                         <div className={cn(
-                            "grid grid-cols-2 gap-x-8 gap-y-1 px-4 text-xs font-black mb-4",
+                            "grid grid-cols-2 gap-x-4 gap-y-0.5 px-3 text-[10px] font-black mb-2",
                             theme.text
                         )}>
                             <div className="flex flex-col items-start gap-0.5">
@@ -159,7 +159,7 @@ export const PlayerCard: React.FC<PlayerCardProps> = ({ player, className }) => 
                                     <span>{stats.pas}</span>
                                 </div>
                             </div>
-                            <div className="flex flex-col items-start gap-0.5 border-l border-current/10 pl-4">
+                            <div className="flex flex-col items-start gap-0.5 border-l border-current/10 pl-3">
                                 <div className="flex justify-between w-full">
                                     <span className="opacity-60">DRI</span>
                                     <span>{stats.dri}</span>
@@ -178,7 +178,7 @@ export const PlayerCard: React.FC<PlayerCardProps> = ({ player, className }) => 
                         {/* Bottom Section */}
                         <div className="mt-auto pb-6 flex flex-col items-center opacity-60">
                             <div className="flex items-center gap-2 mb-1">
-                                <span className={cn("text-[10px] font-black tracking-widest uppercase", theme.text)}>E.R.S. Team</span>
+                                <span className={cn("text-[8px] font-black tracking-widest uppercase", theme.text)}>E.R.S. Team</span>
                             </div>
                         </div>
                     </div>

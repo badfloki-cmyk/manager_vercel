@@ -61,6 +61,7 @@ export default function TacticsPage() {
     const [teamFilter, setTeamFilter] = useState<"All" | "1. Mannschaft" | "2. Mannschaft">("All");
     const [editingTacticId, setEditingTacticId] = useState<string | null>(null);
     const [editName, setEditName] = useState("");
+    const [currentTacticId, setCurrentTacticId] = useState<string | null>(null);
 
     const { data: session } = useSession();
     const isAdmin = session?.user?.role === "admin";
@@ -175,7 +176,7 @@ export default function TacticsPage() {
     };
 
     // Tactic Actions
-    const handleSaveTactic = async () => {
+    const handleSaveTactic = async (forceNew = false) => {
         if (!tacticName) return;
         setIsSaving(true);
         try {
@@ -188,14 +189,22 @@ export default function TacticsPage() {
                 notes: notes,
                 description: tacticDescription
             };
-            await createTactic(data);
+
+            if (currentTacticId && !forceNew) {
+                await updateTactic(currentTacticId, data);
+            } else {
+                await createTactic(data);
+            }
+
             const { tactics } = await getTactics();
             setSavedTactics(tactics);
             setShowSaveModal(false);
             setTacticName("");
+            if (forceNew) {
+                setCurrentTacticId(null);
+            }
             // Do not clear tacticDescription here, as the user might want to keep it for the next save or edit
         } catch (err) {
-
             console.error("Save error:", err);
         } finally {
             setIsSaving(false);
@@ -208,6 +217,8 @@ export default function TacticsPage() {
         setPaths(tactic.drawingData ? JSON.parse(tactic.drawingData) : []);
         setNotes(tactic.notes || []);
         setTacticDescription(tactic.description || "");
+        setCurrentTacticId(tactic._id || null);
+        setTacticName(tactic.name);
         setShowLoadModal(false);
     };
 
@@ -275,6 +286,8 @@ export default function TacticsPage() {
             setPaths([]);
             setNotes([]);
             setTacticDescription("");
+            setCurrentTacticId(null);
+            setTacticName("");
         }
     };
 
@@ -332,13 +345,23 @@ export default function TacticsPage() {
                         </button>
 
                         {isAdmin && (
-                            <button
-                                onClick={() => setShowSaveModal(true)}
-                                className="px-6 py-2 bg-brand hover:bg-brand-dark text-white rounded-lg text-[10px] font-black uppercase tracking-wider transition-all flex items-center gap-2 shadow-lg shadow-brand/20"
-                            >
-                                <Save className="w-4 h-4" />
-                                Speichern
-                            </button>
+                            <>
+                                <button
+                                    onClick={resetPitch}
+                                    className="p-2 bg-white border border-slate-100 rounded-lg hover:bg-slate-50 transition-colors shadow-sm text-slate-400 hover:text-brand"
+                                    title="Neu anlegen"
+                                >
+                                    <Plus className="w-4 h-4" />
+                                </button>
+
+                                <button
+                                    onClick={() => setShowSaveModal(true)}
+                                    className="px-6 py-2 bg-brand hover:bg-brand-dark text-white rounded-lg text-[10px] font-black uppercase tracking-wider transition-all flex items-center gap-2 shadow-lg shadow-brand/20"
+                                >
+                                    <Save className="w-4 h-4" />
+                                    {currentTacticId ? "Aktualisieren" : "Speichern"}
+                                </button>
+                            </>
                         )}
                     </div>
                 </div>
@@ -837,7 +860,9 @@ export default function TacticsPage() {
                                 className="relative w-full max-w-md bg-white border border-slate-100 rounded-[2.5rem] p-10 shadow-2xl"
                             >
                                 <div className="flex items-center justify-between mb-8">
-                                    <h2 className="text-3xl font-black text-brand tracking-tight">Taktik speichern</h2>
+                                    <h2 className="text-3xl font-black text-brand tracking-tight">
+                                        {currentTacticId ? "Taktik aktualisieren" : "Taktik speichern"}
+                                    </h2>
                                     <button onClick={() => setShowSaveModal(false)} className="p-2 hover:bg-slate-50 rounded-full transition-colors text-slate-400">
                                         <X className="w-6 h-6" />
                                     </button>
@@ -859,14 +884,29 @@ export default function TacticsPage() {
                                         <p className="flex justify-between"><span>Spieler</span> <span className="text-slate-900">{playersOnPitch.length}</span></p>
                                         <p className="flex justify-between"><span>Zeichnungen</span> <span className="text-slate-900">{paths.length > 0 ? "Ja" : "Nein"}</span></p>
                                     </div>
-                                    <div className="flex gap-4">
+                                    <div className="flex flex-col gap-3">
                                         <button
                                             disabled={isSaving || !tacticName}
                                             onClick={handleSaveTactic}
-                                            className="flex-1 bg-brand hover:bg-brand-dark disabled:opacity-50 text-white py-4 rounded-2xl font-black uppercase text-xs tracking-widest transition-all flex items-center justify-center gap-2 shadow-xl shadow-brand/20 active:scale-95"
+                                            className="w-full bg-brand hover:bg-brand-dark disabled:opacity-50 text-white py-4 rounded-2xl font-black uppercase text-xs tracking-widest transition-all flex items-center justify-center gap-2 shadow-xl shadow-brand/20 active:scale-95"
                                         >
-                                            {isSaving ? "Speichert..." : <><Check className="w-5 h-5" /> Speichern</>}
+                                            {isSaving ? "Speichert..." : (
+                                                <>
+                                                    <Check className="w-5 h-5" />
+                                                    {currentTacticId ? "Aktualisieren" : "Speichern"}
+                                                </>
+                                            )}
                                         </button>
+
+                                        {currentTacticId && (
+                                            <button
+                                                disabled={isSaving || !tacticName}
+                                                onClick={() => handleSaveTactic(true)}
+                                                className="w-full bg-slate-100 hover:bg-slate-200 text-slate-600 py-3 rounded-2xl font-black uppercase text-[10px] tracking-widest transition-all"
+                                            >
+                                                Als Kopie speichern
+                                            </button>
+                                        )}
                                     </div>
                                 </div>
                             </motion.div>
