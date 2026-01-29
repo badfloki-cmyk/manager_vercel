@@ -280,7 +280,7 @@ export default function SquadPage() {
     );
 
     return (
-        <div className="min-h-screen bg-white text-slate-900">
+        <div className="min-h-screen bg-white text-slate-900" style={{ transform: 'scale(0.8)', transformOrigin: 'top center' }}>
             {/* Header */}
             <header className="sticky top-0 z-50 border-b border-slate-100 bg-white/80 backdrop-blur-md">
                 <div className="mx-auto max-w-7xl px-6 h-20 flex items-center justify-between">
