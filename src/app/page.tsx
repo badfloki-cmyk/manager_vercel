@@ -17,7 +17,13 @@ import Image from "next/image";
 import { cn } from "@/lib/utils";
 import { getPlayers } from "@/lib/squad";
 import { getEvents, Event } from "@/lib/events";
+import { getTactics, TacticData } from "@/lib/tactics";
 import { MatchDayDashboard } from "@/components/MatchDayDashboard";
+
+interface Message {
+  _id: string;
+  createdAt: string;
+}
 
 const features = [
   {
@@ -61,8 +67,22 @@ const features = [
     icon: Settings,
     href: "/settings",
     color: "bg-brand/10 text-brand",
+    key: "settings"
   },
 ];
+
+const NotificationBadge = ({ count }: { count: number }) => {
+  if (count <= 0) return null;
+  return (
+    <motion.div
+      initial={{ scale: 0 }}
+      animate={{ scale: 1 }}
+      className="absolute -top-2 -right-2 w-6 h-6 bg-red-500 text-white text-[10px] font-black rounded-full flex items-center justify-center shadow-lg border-2 border-white z-10"
+    >
+      {count > 9 ? "9+" : count}
+    </motion.div>
+  );
+};
 
 import { useSession, signOut } from "next-auth/react";
 import { LogOut } from "lucide-react";
@@ -74,16 +94,35 @@ export default function Home() {
   const [stats, setStats] = useState({ players: 0, events: 0 });
   const [matchDayEvent, setMatchDayEvent] = useState<Event | null>(null);
   const [showKabinenModus, setShowKabinenModus] = useState(true);
+  const [badgeCounts, setBadgeCounts] = useState<Record<string, number>>({});
 
   useEffect(() => {
     const loadDashboardData = async () => {
       try {
         const { players } = await getPlayers();
         const { events } = await getEvents();
+        const { tactics } = await getTactics();
+        const msgRes = await fetch("/api/messages");
+        const { messages } = await msgRes.json();
 
         setStats({
           players: players?.length || 0,
           events: events?.length || 0
+        });
+
+        // Calculate badges
+        const getNewCount = (items: any[], storageKey: string) => {
+          const lastSeen = localStorage.getItem(storageKey);
+          if (!lastSeen) return items?.length || 0;
+          const lastSeenDate = new Date(lastSeen);
+          return items?.filter(item => new Date(item.createdAt) > lastSeenDate).length || 0;
+        };
+
+        setBadgeCounts({
+          "/squad": getNewCount(players || [], "lastSeen_squad"),
+          "/calendar": getNewCount(events || [], "lastSeen_calendar"),
+          "/tactics": getNewCount(tactics || [], "lastSeen_tactics"),
+          "/messages": getNewCount(messages || [], "lastSeen_messages"),
         });
 
         // Detect if there's a match today
@@ -208,8 +247,9 @@ export default function Home() {
               >
                 <Link
                   href={feature.href}
-                  className="group flex flex-col h-full rounded-3xl border border-slate-100 bg-white p-8 shadow-xl shadow-slate-200/50 hover:shadow-2xl hover:shadow-brand/5 hover:border-brand/20 transition-all active:scale-[0.98]"
+                  className="group flex flex-col h-full rounded-3xl border border-slate-100 bg-white p-8 shadow-xl shadow-slate-200/50 hover:shadow-2xl hover:shadow-brand/5 hover:border-brand/20 transition-all active:scale-[0.98] relative"
                 >
+                  <NotificationBadge count={badgeCounts[feature.href] || 0} />
                   <div className={cn("w-14 h-14 rounded-2xl flex items-center justify-center mb-8 shadow-inner", feature.color)}>
                     <feature.icon className="w-7 h-7" />
                   </div>

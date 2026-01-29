@@ -90,6 +90,7 @@ export default function SquadPage() {
 
     useEffect(() => {
         loadPlayers();
+        localStorage.setItem("lastSeen_squad", new Date().toISOString());
     }, [loadPlayers]);
 
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
