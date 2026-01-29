@@ -43,7 +43,7 @@ export default function SquadPage() {
         number: string;
         position: string;
         status: 'Active' | 'Injured' | 'Away';
-        role: 'Captain' | 'Regular' | 'Trainer';
+        role: 'Captain' | 'Regular' | 'Admin';
         photoUrl?: string;
         fifaStats: {
             pac: number;
