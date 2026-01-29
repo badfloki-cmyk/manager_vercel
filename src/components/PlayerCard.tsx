@@ -4,6 +4,7 @@ import React from "react";
 import Image from "next/image";
 import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
+import { Users } from "lucide-react";
 
 interface PlayerCardProps {
     player: {
@@ -36,93 +37,147 @@ export const PlayerCard: React.FC<PlayerCardProps> = ({ player, className }) => 
         rating: 50,
     };
 
-    const getCardTheme = (rating: number) => {
-        if (rating >= 85) return "bg-gradient-to-br from-[#FFD700] via-[#FDB931] to-[#9E7E38] text-[#4D3F1E]";
-        if (rating >= 75) return "bg-gradient-to-br from-[#E5E7EB] via-[#D1D5DB] to-[#9CA3AF] text-[#374151]";
-        return "bg-gradient-to-br from-[#CD7F32] via-[#A0522D] to-[#8B4513] text-[#F3E5AB]";
+    const getThemeColors = (rating: number) => {
+        if (rating >= 85) return {
+            bg: "from-[#FBF2C4] via-[#F6D242] to-[#D4AF37]",
+            border: "border-[#D4AF37]",
+            text: "text-[#4D3F1E]",
+            accent: "bg-[#4D3F1E]/10"
+        };
+        if (rating >= 75) return {
+            bg: "from-[#F3F4F6] via-[#D1D5DB] to-[#9CA3AF]",
+            border: "border-[#9CA3AF]",
+            text: "text-[#1F2937]",
+            accent: "bg-[#1F2937]/10"
+        };
+        return {
+            bg: "from-[#E3A678] via-[#CD7F32] to-[#8B4513]",
+            border: "border-[#8B4513]",
+            text: "text-[#2D1B0E]",
+            accent: "bg-[#2D1B0E]/10"
+        };
     };
+
+    const theme = getThemeColors(stats.rating);
 
     return (
         <motion.div
-            whileHover={{ scale: 1.05, rotateY: 5, rotateX: -5 }}
+            whileHover={{
+                scale: 1.05,
+                rotateY: 10,
+                transition: { duration: 0.4, ease: "easeOut" }
+            }}
+            style={{
+                clipPath: "polygon(10% 0, 90% 0, 100% 15%, 100% 88%, 50% 100%, 0 88%, 0 15%)"
+            }}
             className={cn(
-                "relative w-64 h-96 rounded-[2rem] overflow-hidden shadow-2xl border-4 border-white/20 backdrop-blur-sm transition-all duration-500 preserve-3d",
-                getCardTheme(stats.rating),
+                "group relative w-64 h-[380px] overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.3)] transition-all duration-500 bg-gradient-to-br",
+                theme.bg,
                 className
             )}
         >
-            {/* Glossy Overlay */}
-            <div className="absolute inset-0 bg-gradient-to-tr from-white/10 via-transparent to-white/5 pointer-events-none" />
+            {/* Texture Overlay */}
+            <div className="absolute inset-0 opacity-[0.1] bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] pointer-events-none mix-blend-overlay" />
+
+            {/* Radial Shine */}
+            <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_30%,rgba(255,255,255,0.4)_0%,transparent_70%)] pointer-events-none" />
 
             {/* Content Container */}
-            <div className="relative h-full flex flex-col p-4">
+            <div className="relative h-full flex flex-col pt-12 px-4 text-center">
+
                 {/* Header: Rating & Position */}
-                <div className="flex flex-col items-center absolute left-4 top-8">
-                    <span className="text-5xl font-black leading-none">{stats.rating}</span>
-                    <span className="text-xl font-bold uppercase tracking-tighter opacity-80">{player.position.substring(0, 3)}</span>
+                <div className={cn(
+                    "absolute left-4 top-10 flex flex-col items-center gap-0 z-20 font-black",
+                    theme.text
+                )}>
+                    <span className="text-5xl tracking-tighter leading-none">{stats.rating}</span>
+                    <span className="text-lg uppercase tracking-tight opacity-70 border-t border-current w-full mt-1 pt-1">
+                        {player.position.substring(0, 3)}
+                    </span>
                 </div>
 
-                {/* Player Photo */}
-                <div className="absolute right-0 top-4 w-44 h-56 overflow-hidden">
-                    {player.photoUrl ? (
-                        <Image
-                            src={player.photoUrl}
-                            alt={player.lastName}
-                            fill
-                            className="object-cover object-top filter contrast-125 saturate-110"
-                        />
-                    ) : (
-                        <div className="w-full h-full bg-black/10 flex items-center justify-center">
-                            <span className="text-6xl font-black opacity-20">{player.number}</span>
-                        </div>
-                    )}
+                {/* Player Photo Container */}
+                <div className="absolute right-[-10px] top-6 w-48 h-64 z-10">
+                    <div
+                        className="relative w-full h-full"
+                        style={{
+                            WebkitMaskImage: "linear-gradient(to bottom, black 75%, transparent 100%)",
+                            maskImage: "linear-gradient(to bottom, black 75%, transparent 100%)"
+                        }}
+                    >
+                        {player.photoUrl ? (
+                            <Image
+                                src={player.photoUrl}
+                                alt={player.lastName}
+                                fill
+                                className="object-cover object-top drop-shadow-[0_10px_10px_rgba(0,0,0,0.3)] contrast-110 saturate-110"
+                            />
+                        ) : (
+                            <div className="w-full h-full flex items-center justify-center opacity-20">
+                                <Users className="w-24 h-24" />
+                            </div>
+                        )}
+                    </div>
                 </div>
 
-                {/* Name */}
-                <div className="mt-auto mb-20 text-center relative z-10">
-                    <div className="h-px w-full bg-current opacity-20 mb-2" />
-                    <h3 className="text-2xl font-black uppercase tracking-tight truncate px-2 italic">
+                {/* Name Plate */}
+                <div className="mt-[170px] relative z-20">
+                    <h3 className={cn(
+                        "text-3xl font-black uppercase tracking-tighter truncate italic drop-shadow-sm",
+                        theme.text
+                    )}>
                         {player.lastName}
                     </h3>
-                    <div className="h-px w-full bg-current opacity-20 mt-2" />
                 </div>
 
-                {/* Main Stats Grid */}
-                <div className="grid grid-cols-2 gap-x-6 gap-y-1 px-4 mb-4 font-black">
-                    <div className="flex justify-between items-center text-sm">
-                        <span className="opacity-70">PAC</span>
-                        <span>{stats.pac}</span>
+                {/* Divider */}
+                <div className={cn("h-[2px] w-4/5 mx-auto my-2 opacity-20", theme.text === "text-[#F3E5AB]" ? "bg-white" : "bg-black")} />
+
+                {/* Stats Grid */}
+                <div className={cn(
+                    "grid grid-cols-2 gap-x-8 gap-y-1 px-4 text-xs font-black mb-4",
+                    theme.text
+                )}>
+                    <div className="flex flex-col items-start gap-0.5">
+                        <div className="flex justify-between w-full">
+                            <span className="opacity-60">PAC</span>
+                            <span>{stats.pac}</span>
+                        </div>
+                        <div className="flex justify-between w-full">
+                            <span className="opacity-60">SHO</span>
+                            <span>{stats.sho}</span>
+                        </div>
+                        <div className="flex justify-between w-full">
+                            <span className="opacity-60">PAS</span>
+                            <span>{stats.pas}</span>
+                        </div>
                     </div>
-                    <div className="flex justify-between items-center text-sm">
-                        <span className="opacity-70">DRI</span>
-                        <span>{stats.dri}</span>
-                    </div>
-                    <div className="flex justify-between items-center text-sm">
-                        <span className="opacity-70">SHO</span>
-                        <span>{stats.sho}</span>
-                    </div>
-                    <div className="flex justify-between items-center text-sm">
-                        <span className="opacity-70">DEF</span>
-                        <span>{stats.def}</span>
-                    </div>
-                    <div className="flex justify-between items-center text-sm">
-                        <span className="opacity-70">PAS</span>
-                        <span>{stats.pas}</span>
-                    </div>
-                    <div className="flex justify-between items-center text-sm">
-                        <span className="opacity-70">PHY</span>
-                        <span>{stats.phy}</span>
+                    <div className="flex flex-col items-start gap-0.5 border-l border-current/10 pl-4">
+                        <div className="flex justify-between w-full">
+                            <span className="opacity-60">DRI</span>
+                            <span>{stats.dri}</span>
+                        </div>
+                        <div className="flex justify-between w-full">
+                            <span className="opacity-60">DEF</span>
+                            <span>{stats.def}</span>
+                        </div>
+                        <div className="flex justify-between w-full">
+                            <span className="opacity-60">PHY</span>
+                            <span>{stats.phy}</span>
+                        </div>
                     </div>
                 </div>
 
-                {/* Bottom Logo */}
-                <div className="flex justify-center mt-auto opacity-40 grayscale group-hover:grayscale-0 transition-all">
-                    <Image src="/logo_new.png" alt="Club Logo" width={40} height={40} className="h-6 w-auto object-contain" />
+                {/* Bottom Section */}
+                <div className="mt-auto pb-6 flex flex-col items-center opacity-60">
+                    <div className="flex items-center gap-2 mb-1">
+                        <span className="text-[10px] font-black tracking-widest uppercase">E.R.S. Team</span>
+                    </div>
                 </div>
             </div>
 
-            {/* Holographic Shine Effect */}
-            <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full duration-1000" />
+            {/* Reflection Shine Effect */}
+            <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full duration-1000 pointer-events-none" />
         </motion.div>
     );
 };
