@@ -12,7 +12,7 @@ interface PlayerCardProps {
         lastName: string;
         number: number;
         position: string;
-        role?: 'Captain' | 'Regular' | 'Admin';
+        role?: 'Captain' | 'Regular' | 'Admin' | 'Trainer';
         photoUrl?: string;
         fifaStats?: {
             pac: number;
