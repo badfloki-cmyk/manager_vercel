@@ -4,7 +4,7 @@ import React from "react";
 import Image from "next/image";
 import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
-import { Users } from "lucide-react";
+import { Users, Ambulance, Armchair } from "lucide-react";
 
 interface PlayerCardProps {
     player: {
@@ -13,6 +13,8 @@ interface PlayerCardProps {
         number: number;
         position: string;
         role?: 'Captain' | 'Regular' | 'Admin' | 'Trainer';
+        status?: 'Active' | 'Injured' | 'Away';
+        onBench?: boolean;
         photoUrl?: string;
         fifaStats?: {
             pac: number;
@@ -88,6 +90,23 @@ export const PlayerCard: React.FC<PlayerCardProps> = ({ player, className }) => 
             >
                 {/* Inner Content Card */}
                 <div
+                    style={{ clipPath: shieldPath }}
+                    className={cn("relative w-full h-full bg-gradient-to-br flex flex-col items-center pt-6 pb-2", theme.bg)}
+                >
+                    {/* Status Icons */}
+                    <div className="absolute top-4 right-4 z-20 flex flex-col gap-1">
+                        {player.status === 'Injured' && (
+                            <div className="bg-red-500 text-white p-1 rounded-full shadow-lg" title="Verletzt">
+                                <Ambulance className="w-4 h-4" />
+                            </div>
+                        )}
+                        {player.onBench && (
+                            <div className="bg-yellow-500 text-white p-1 rounded-full shadow-lg" title="Auf der Bank">
+                                <Armchair className="w-4 h-4" />
+                            </div>
+                        )}
+                    </div>
+
                     style={{ clipPath: shieldPath }}
                     className={cn(
                         "relative h-full w-full overflow-hidden bg-gradient-to-br",
