@@ -13,7 +13,7 @@ export async function GET(request: Request) {
         const endDate = searchParams.get('endDate');
 
         // Support matching both team specific and "Both"
-        let query: any = {};
+        const query: { team?: { $in: string[] }; date?: { $gte?: string; $lte?: string } } = {};
         if (team) {
             query.team = { $in: [team, 'Both'] };
         }
