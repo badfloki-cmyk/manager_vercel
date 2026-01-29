@@ -236,7 +236,9 @@ export default function SquadPage() {
 
     const SquadPlayerCard = ({ player }: { player: Player }) => (
         <div className="relative group">
-            <FIFACard player={player} />
+            <Link href={`/squad/${player._id}`} className="block">
+                <FIFACard player={player} />
+            </Link>
 
             {/* Action Buttons Overlay */}
             {isAdmin && (
