@@ -16,6 +16,15 @@ export interface Player {
         assists: number;
         appearances: number;
     };
+    fifaStats?: {
+        pac: number;
+        sho: number;
+        pas: number;
+        dri: number;
+        def: number;
+        phy: number;
+        rating: number;
+    };
     notes?: string[];
 }
 

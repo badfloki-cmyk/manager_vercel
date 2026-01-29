@@ -9,13 +9,19 @@ import {
   LayoutDashboard,
   MessageSquare,
   Settings,
-  Activity
+  Activity,
+  Trophy,
+  MapPin,
+  Clock,
+  ChevronRight,
+  ExternalLink
 } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
 import { cn } from "@/lib/utils";
 import { getPlayers } from "@/lib/squad";
 import { getEvents } from "@/lib/events";
+import { MatchDayDashboard } from "@/components/MatchDayDashboard";
 
 const features = [
   {
@@ -70,21 +76,34 @@ export default function Home() {
   const isAdmin = session?.user?.role === "admin";
 
   const [stats, setStats] = useState({ players: 0, events: 0 });
+  const [matchDayEvent, setMatchDayEvent] = useState<any>(null);
+  const [showKabinenModus, setShowKabinenModus] = useState(true);
 
   useEffect(() => {
-    const loadStats = async () => {
+    const loadDashboardData = async () => {
       try {
         const { players } = await getPlayers();
         const { events } = await getEvents();
+
         setStats({
           players: players?.length || 0,
           events: events?.length || 0
         });
+
+        // Detect if there's a match today
+        const today = new Date().toISOString().split('T')[0];
+        const todayMatch = events?.find((e: any) =>
+          e.type === 'Match' && e.date.startsWith(today)
+        );
+
+        if (todayMatch) {
+          setMatchDayEvent(todayMatch);
+        }
       } catch (error) {
         console.error("Dashboard load error:", error);
       }
     };
-    loadStats();
+    loadDashboardData();
   }, []);
 
   // Filter features based on role
@@ -92,6 +111,15 @@ export default function Home() {
     if (f.title === "Einstellungen") return isAdmin;
     return true;
   });
+
+  if (matchDayEvent && showKabinenModus) {
+    return (
+      <MatchDayDashboard
+        event={matchDayEvent}
+        onClose={() => setShowKabinenModus(false)}
+      />
+    );
+  }
 
   return (
     <div className="min-h-screen bg-white text-slate-900">
@@ -155,6 +183,22 @@ export default function Home() {
                 <span className="text-[10px] text-slate-400 uppercase font-black tracking-[0.2em] mt-1">Teams</span>
               </div>
             </div>
+
+            {matchDayEvent && !showKabinenModus && (
+              <motion.div
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                className="mt-8 flex justify-center"
+              >
+                <button
+                  onClick={() => setShowKabinenModus(true)}
+                  className="group flex items-center gap-3 bg-brand/10 hover:bg-brand/20 border border-brand/20 px-6 py-3 rounded-2xl transition-all"
+                >
+                  <Trophy className="w-5 h-5 text-brand animate-bounce" />
+                  <span className="text-xs font-black uppercase tracking-widest text-brand">Kabinen-Modus aktivieren</span>
+                </button>
+              </motion.div>
+            )}
           </motion.div>
 
           {/* Grid */}

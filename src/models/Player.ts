@@ -15,6 +15,15 @@ export interface IPlayer extends Document {
         assists: number;
         appearances: number;
     };
+    fifaStats?: {
+        pac: number;
+        sho: number;
+        pas: number;
+        dri: number;
+        def: number;
+        phy: number;
+        rating: number;
+    };
     notes?: string[];
 }
 
@@ -33,6 +42,15 @@ const PlayerSchema: Schema = new Schema(
             goals: { type: Number, default: 0 },
             assists: { type: Number, default: 0 },
             appearances: { type: Number, default: 0 },
+        },
+        fifaStats: {
+            pac: { type: Number, default: 50 },
+            sho: { type: Number, default: 50 },
+            pas: { type: Number, default: 50 },
+            dri: { type: Number, default: 50 },
+            def: { type: Number, default: 50 },
+            phy: { type: Number, default: 50 },
+            rating: { type: Number, default: 50 },
         },
         notes: { type: [String], default: [] },
     },

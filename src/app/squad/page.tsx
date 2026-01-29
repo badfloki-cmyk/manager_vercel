@@ -22,6 +22,7 @@ import Image from "next/image";
 import { cn } from "@/lib/utils";
 import { useSession } from "next-auth/react";
 import { getPlayers, createPlayer, deletePlayer, updatePlayer, Player } from "@/lib/squad";
+import { PlayerCard as FIFACard } from "@/components/PlayerCard";
 
 export default function SquadPage() {
     const [team, setTeam] = useState<"1. Mannschaft" | "2. Mannschaft">("1. Mannschaft");
@@ -43,6 +44,15 @@ export default function SquadPage() {
         status: 'Active' | 'Injured' | 'Away';
         role: 'Captain' | 'Regular';
         photoUrl?: string;
+        fifaStats: {
+            pac: number;
+            sho: number;
+            pas: number;
+            dri: number;
+            def: number;
+            phy: number;
+            rating: number;
+        };
     }>({
         firstName: "",
         lastName: "",
@@ -51,6 +61,15 @@ export default function SquadPage() {
         status: "Active",
         role: "Regular",
         photoUrl: "",
+        fifaStats: {
+            pac: 50,
+            sho: 50,
+            pas: 50,
+            dri: 50,
+            def: 50,
+            phy: 50,
+            rating: 50,
+        }
     });
 
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -135,7 +154,24 @@ export default function SquadPage() {
     };
 
     const resetForm = () => {
-        setNewPlayer({ firstName: "", lastName: "", number: "", position: "Sturm", status: "Active", role: "Regular", photoUrl: "" });
+        setNewPlayer({
+            firstName: "",
+            lastName: "",
+            number: "",
+            position: "Sturm",
+            status: "Active",
+            role: "Regular",
+            photoUrl: "",
+            fifaStats: {
+                pac: 50,
+                sho: 50,
+                pas: 50,
+                dri: 50,
+                def: 50,
+                phy: 50,
+                rating: 50,
+            }
+        });
         setSelectedFile(null);
         setPreviewUrl(null);
         setIsEditing(false);
@@ -150,7 +186,16 @@ export default function SquadPage() {
             position: player.position,
             status: player.status,
             role: player.role,
-            photoUrl: player.photoUrl
+            photoUrl: player.photoUrl,
+            fifaStats: player.fifaStats || {
+                pac: 50,
+                sho: 50,
+                pas: 50,
+                dri: 50,
+                def: 50,
+                phy: 50,
+                rating: 50,
+            }
         });
         setPreviewUrl(player.photoUrl || null);
         setIsEditing(true);
@@ -186,110 +231,47 @@ export default function SquadPage() {
         p.position.toLowerCase().includes(searchTerm.toLowerCase())
     );
 
-    const activePlayers = filteredPlayers.filter(p => !p.onBench);
-    const benchPlayers = filteredPlayers.filter(p => p.onBench);
+    const activePlayers = filteredPlayers.filter((p: Player) => !p.onBench);
+    const benchPlayers = filteredPlayers.filter((p: Player) => p.onBench);
 
-    const PlayerCard = ({ player, index }: { player: Player; index: number }) => (
-        <motion.div
-            key={player._id}
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.95 }}
-            transition={{ duration: 0.2, delay: index * 0.05 }}
-            className={cn(
-                "group relative bg-white border p-6 rounded-3xl hover:shadow-2xl hover:shadow-brand/5 hover:border-brand/20 transition-all",
-                player.onBench ? "border-slate-100 opacity-75 shadow-sm" : "border-slate-100 shadow-xl shadow-slate-200/50"
-            )}
-        >
-            <Link href={`/squad/${player._id}`} className="block">
-                <div className="flex items-start justify-between mb-4">
-                    <div className="flex items-center gap-4">
-                        <div className="w-14 h-14 rounded-2xl bg-slate-50 flex items-center justify-center text-xl font-black text-brand overflow-hidden relative border border-slate-100">
-                            {player.photoUrl ? (
-                                <Image
-                                    src={player.photoUrl}
-                                    alt={`${player.firstName} ${player.lastName}`}
-                                    fill
-                                    className="object-cover"
-                                />
-                            ) : (
-                                player.number
-                            )}
-                        </div>
-                        <div>
-                            <h3 className="font-black text-slate-900 text-lg leading-tight uppercase tracking-tight">
-                                {player.firstName} <br /> {player.lastName}
-                            </h3>
-                            <p className="text-brand text-[10px] uppercase tracking-[0.1em] font-black mt-1">
-                                {player.position}
-                            </p>
-                        </div>
-                    </div>
-                    <div className="flex flex-col gap-2 items-end">
-                        <div className={cn(
-                            "px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider",
-                            player.status === "Active" ? "bg-emerald-50 text-emerald-600" : "bg-orange-50 text-orange-600"
-                        )}>
-                            {player.status}
-                        </div>
-                        {player.onBench && (
-                            <div className="px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider bg-slate-100 text-slate-500">
-                                Bank
-                            </div>
-                        )}
-                    </div>
-                </div>
+    const SquadPlayerCard = ({ player, index }: { player: Player; index: number }) => (
+        <div className="relative group">
+            <FIFACard player={player} />
 
-                <div className="grid grid-cols-3 gap-4 pt-4 border-t border-slate-50">
-                    <div className="text-center">
-                        <p className="text-[10px] text-slate-400 uppercase font-black mb-1">Tore</p>
-                        <p className="font-black text-slate-900">{player.stats.goals}</p>
-                    </div>
-                    <div className="text-center">
-                        <p className="text-[10px] text-slate-400 uppercase font-black mb-1">Assists</p>
-                        <p className="font-black text-slate-900">{player.stats.assists}</p>
-                    </div>
-                    <div className="text-center">
-                        <p className="text-[10px] text-slate-400 uppercase font-black mb-1">Einsätze</p>
-                        <p className="font-black text-slate-900">{player.stats.appearances}</p>
-                    </div>
-                </div>
-            </Link>
-
-            {/* Action Buttons */}
+            {/* Action Buttons Overlay */}
             {isAdmin && (
-                <div className="absolute top-4 right-4 flex gap-1 opacity-0 group-hover:opacity-100 transition-all">
+                <div className="absolute top-4 right-4 flex flex-col gap-2 opacity-0 group-hover:opacity-100 transition-all z-20">
                     <button
                         onClick={() => toggleBench(player)}
                         className={cn(
-                            "p-2 rounded-xl transition-all shadow-sm border border-slate-100 bg-white",
+                            "p-3 rounded-2xl transition-all shadow-xl backdrop-blur-md border border-white/20",
                             player.onBench
-                                ? "hover:bg-emerald-50 hover:text-emerald-600"
-                                : "hover:bg-orange-50 hover:text-orange-600"
+                                ? "bg-emerald-500/80 text-white hover:bg-emerald-600"
+                                : "bg-orange-500/80 text-white hover:bg-orange-600"
                         )}
                         title={player.onBench ? "Auf Feld setzen" : "Auf Bank setzen"}
                     >
                         {player.onBench ? (
-                            <ArrowUpFromLine className="w-4 h-4" />
+                            <ArrowUpFromLine className="w-5 h-5" />
                         ) : (
-                            <ArrowDownToLine className="w-4 h-4" />
+                            <ArrowDownToLine className="w-5 h-5" />
                         )}
                     </button>
                     <button
                         onClick={() => handleEditPlayer(player)}
-                        className="p-2 bg-white border border-slate-100 shadow-sm hover:bg-brand hover:text-white rounded-xl transition-all"
+                        className="p-3 bg-white/80 backdrop-blur-md border border-white/20 shadow-xl hover:bg-brand hover:text-white rounded-2xl transition-all text-slate-900"
                     >
-                        <Pencil className="w-4 h-4" />
+                        <Pencil className="w-5 h-5" />
                     </button>
                     <button
                         onClick={() => handleDeletePlayer(player._id)}
-                        className="p-2 bg-white border border-slate-100 shadow-sm hover:bg-red-500 hover:text-white rounded-xl transition-all"
+                        className="p-3 bg-white/80 backdrop-blur-md border border-white/20 shadow-xl hover:bg-red-500 hover:text-white rounded-2xl transition-all text-slate-900"
                     >
-                        <Trash2 className="w-4 h-4" />
+                        <Trash2 className="w-5 h-5" />
                     </button>
                 </div>
             )}
-        </motion.div>
+        </div>
     );
 
     return (
@@ -386,8 +368,8 @@ export default function SquadPage() {
                             </h2>
                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                                 <AnimatePresence mode="popLayout">
-                                    {activePlayers.map((player, index) => (
-                                        <PlayerCard key={player._id} player={player} index={index} />
+                                    {activePlayers.map((player: Player, index: number) => (
+                                        <SquadPlayerCard key={player._id} player={player} index={index} />
                                     ))}
                                 </AnimatePresence>
                             </div>
@@ -422,8 +404,8 @@ export default function SquadPage() {
                                         exit={{ opacity: 0, height: 0 }}
                                         className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
                                     >
-                                        {benchPlayers.map((player, index) => (
-                                            <PlayerCard key={player._id} player={player} index={index} />
+                                        {benchPlayers.map((player: Player, index: number) => (
+                                            <SquadPlayerCard key={player._id} player={player} index={index} />
                                         ))}
                                     </motion.div>
                                 )}
@@ -493,7 +475,7 @@ export default function SquadPage() {
                                             required
                                             type="text"
                                             value={newPlayer.firstName}
-                                            onChange={(e) => setNewPlayer({ ...newPlayer, firstName: e.target.value })}
+                                            onChange={(e: React.ChangeEvent<HTMLInputElement>) => setNewPlayer({ ...newPlayer, firstName: e.target.value })}
                                             className="w-full bg-slate-50 border border-slate-100 rounded-2xl px-5 py-3.5 focus:outline-none focus:border-brand/30 focus:bg-white transition-all text-sm font-medium shadow-inner"
                                         />
                                     </div>
@@ -503,7 +485,7 @@ export default function SquadPage() {
                                             required
                                             type="text"
                                             value={newPlayer.lastName}
-                                            onChange={(e) => setNewPlayer({ ...newPlayer, lastName: e.target.value })}
+                                            onChange={(e: React.ChangeEvent<HTMLInputElement>) => setNewPlayer({ ...newPlayer, lastName: e.target.value })}
                                             className="w-full bg-slate-50 border border-slate-100 rounded-2xl px-5 py-3.5 focus:outline-none focus:border-brand/30 focus:bg-white transition-all text-sm font-medium shadow-inner"
                                         />
                                     </div>
@@ -516,7 +498,7 @@ export default function SquadPage() {
                                             required
                                             type="number"
                                             value={newPlayer.number}
-                                            onChange={(e) => setNewPlayer({ ...newPlayer, number: e.target.value })}
+                                            onChange={(e: React.ChangeEvent<HTMLInputElement>) => setNewPlayer({ ...newPlayer, number: e.target.value })}
                                             className="w-full bg-slate-50 border border-slate-100 rounded-2xl px-5 py-3.5 focus:outline-none focus:border-brand/30 focus:bg-white transition-all text-sm font-medium shadow-inner"
                                         />
                                     </div>
@@ -524,7 +506,7 @@ export default function SquadPage() {
                                         <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-1">Position</label>
                                         <select
                                             value={newPlayer.position}
-                                            onChange={(e) => setNewPlayer({ ...newPlayer, position: e.target.value })}
+                                            onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setNewPlayer({ ...newPlayer, position: e.target.value })}
                                             className="w-full bg-slate-50 border border-slate-100 rounded-2xl px-5 py-3.5 focus:outline-none focus:border-brand/30 focus:bg-white transition-all text-sm font-medium shadow-inner appearance-none cursor-pointer"
                                         >
                                             <option>Torwart</option>
@@ -540,7 +522,7 @@ export default function SquadPage() {
                                         <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-1">Status</label>
                                         <select
                                             value={newPlayer.status}
-                                            onChange={(e) => setNewPlayer({ ...newPlayer, status: e.target.value as 'Active' | 'Injured' | 'Away' })}
+                                            onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setNewPlayer({ ...newPlayer, status: e.target.value as 'Active' | 'Injured' | 'Away' })}
                                             className="w-full bg-slate-50 border border-slate-100 rounded-2xl px-5 py-3.5 focus:outline-none focus:border-brand/30 focus:bg-white transition-all text-sm font-medium shadow-inner appearance-none cursor-pointer"
                                         >
                                             <option value="Active">Aktiv</option>
@@ -552,12 +534,48 @@ export default function SquadPage() {
                                         <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-1">Rolle</label>
                                         <select
                                             value={newPlayer.role}
-                                            onChange={(e) => setNewPlayer({ ...newPlayer, role: e.target.value as 'Captain' | 'Regular' })}
+                                            onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setNewPlayer({ ...newPlayer, role: e.target.value as 'Captain' | 'Regular' })}
                                             className="w-full bg-slate-50 border border-slate-100 rounded-2xl px-5 py-3.5 focus:outline-none focus:border-brand/30 focus:bg-white transition-all text-sm font-medium shadow-inner appearance-none cursor-pointer"
                                         >
                                             <option value="Regular">Normal</option>
                                             <option value="Captain">Kapitän</option>
                                         </select>
+                                    </div>
+                                </div>
+
+                                <div className="p-6 bg-brand/5 rounded-[2rem] border border-brand/10 space-y-6">
+                                    <h3 className="text-sm font-black uppercase tracking-widest text-brand flex items-center justify-between px-2">
+                                        FIFA Stats
+                                        <span className="text-2xl">{newPlayer.fifaStats.rating} OVR</span>
+                                    </h3>
+
+                                    <div className="grid grid-cols-3 gap-4">
+                                        {[
+                                            { label: "PAC", key: "pac" },
+                                            { label: "SHO", key: "sho" },
+                                            { label: "PAS", key: "pas" },
+                                            { label: "DRI", key: "dri" },
+                                            { label: "DEF", key: "def" },
+                                            { label: "PHY", key: "phy" },
+                                        ].map((s) => (
+                                            <div key={s.key} className="space-y-1">
+                                                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-1">{s.label}</label>
+                                                <input
+                                                    type="number"
+                                                    min="1"
+                                                    max="99"
+                                                    value={newPlayer.fifaStats[s.key as keyof typeof newPlayer.fifaStats]}
+                                                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                                                        const newVal = parseInt(e.target.value) || 0;
+                                                        const newFifaStats = { ...newPlayer.fifaStats, [s.key]: newVal };
+                                                        const sum = newFifaStats.pac + newFifaStats.sho + newFifaStats.pas + newFifaStats.dri + newFifaStats.def + newFifaStats.phy;
+                                                        newFifaStats.rating = Math.round(sum / 6);
+                                                        setNewPlayer({ ...newPlayer, fifaStats: newFifaStats });
+                                                    }}
+                                                    className="w-full bg-white border border-slate-100 rounded-xl px-3 py-2 focus:outline-none focus:border-brand/30 transition-all text-xs font-black shadow-inner"
+                                                />
+                                            </div>
+                                        ))}
                                     </div>
                                 </div>
 
