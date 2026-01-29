@@ -227,7 +227,7 @@ export default function SquadPage() {
         }
     };
 
-    const { data: session } = useSession();
+
     const isAdmin = session?.user?.role === "admin";
 
     const filteredPlayers = players.filter((p: Player) =>
