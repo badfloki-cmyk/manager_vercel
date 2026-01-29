@@ -17,13 +17,10 @@ import Image from "next/image";
 import { cn } from "@/lib/utils";
 import { getPlayers } from "@/lib/squad";
 import { getEvents, Event } from "@/lib/events";
-import { getTactics, TacticData } from "@/lib/tactics";
+import { getTactics } from "@/lib/tactics";
 import { MatchDayDashboard } from "@/components/MatchDayDashboard";
 
-interface Message {
-  _id: string;
-  createdAt: string;
-}
+
 
 const features = [
   {
@@ -111,7 +108,7 @@ export default function Home() {
         });
 
         // Calculate badges
-        const getNewCount = (items: any[], storageKey: string) => {
+        const getNewCount = (items: { createdAt: string }[], storageKey: string) => {
           const lastSeen = localStorage.getItem(storageKey);
           if (!lastSeen) return items?.length || 0;
           const lastSeenDate = new Date(lastSeen);
