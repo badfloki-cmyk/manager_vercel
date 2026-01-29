@@ -10,17 +10,13 @@ import {
   MessageSquare,
   Settings,
   Activity,
-  Trophy,
-  MapPin,
-  Clock,
-  ChevronRight,
-  ExternalLink
+  Trophy
 } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
 import { cn } from "@/lib/utils";
 import { getPlayers } from "@/lib/squad";
-import { getEvents } from "@/lib/events";
+import { getEvents, Event } from "@/lib/events";
 import { MatchDayDashboard } from "@/components/MatchDayDashboard";
 
 const features = [
@@ -76,7 +72,7 @@ export default function Home() {
   const isAdmin = session?.user?.role === "admin";
 
   const [stats, setStats] = useState({ players: 0, events: 0 });
-  const [matchDayEvent, setMatchDayEvent] = useState<any>(null);
+  const [matchDayEvent, setMatchDayEvent] = useState<Event | null>(null);
   const [showKabinenModus, setShowKabinenModus] = useState(true);
 
   useEffect(() => {
@@ -92,7 +88,7 @@ export default function Home() {
 
         // Detect if there's a match today
         const today = new Date().toISOString().split('T')[0];
-        const todayMatch = events?.find((e: any) =>
+        const todayMatch = events?.find((e: Event) =>
           e.type === 'Match' && e.date.startsWith(today)
         );
 

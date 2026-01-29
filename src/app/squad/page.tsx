@@ -234,7 +234,7 @@ export default function SquadPage() {
     const activePlayers = filteredPlayers.filter((p: Player) => !p.onBench);
     const benchPlayers = filteredPlayers.filter((p: Player) => p.onBench);
 
-    const SquadPlayerCard = ({ player, index }: { player: Player; index: number }) => (
+    const SquadPlayerCard = ({ player }: { player: Player }) => (
         <div className="relative group">
             <FIFACard player={player} />
 
@@ -368,8 +368,8 @@ export default function SquadPage() {
                             </h2>
                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                                 <AnimatePresence mode="popLayout">
-                                    {activePlayers.map((player: Player, index: number) => (
-                                        <SquadPlayerCard key={player._id} player={player} index={index} />
+                                    {activePlayers.map((player: Player) => (
+                                        <SquadPlayerCard key={player._id} player={player} />
                                     ))}
                                 </AnimatePresence>
                             </div>
@@ -404,8 +404,8 @@ export default function SquadPage() {
                                         exit={{ opacity: 0, height: 0 }}
                                         className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
                                     >
-                                        {benchPlayers.map((player: Player, index: number) => (
-                                            <SquadPlayerCard key={player._id} player={player} index={index} />
+                                        {benchPlayers.map((player: Player) => (
+                                            <SquadPlayerCard key={player._id} player={player} />
                                         ))}
                                     </motion.div>
                                 )}
