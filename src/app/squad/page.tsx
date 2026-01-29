@@ -369,7 +369,7 @@ export default function SquadPage() {
                             <div className="mb-16">
                                 <h2 className="text-lg font-black mb-6 flex items-center gap-3 text-brand uppercase tracking-widest">
                                     <Users className="w-5 h-5" />
-                                    Admins & Coaching
+                                    Trainer & Coaching
                                 </h2>
                                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                                     <AnimatePresence mode="popLayout">
@@ -565,46 +565,47 @@ export default function SquadPage() {
                                         >
                                             <option value="Regular">Normal</option>
                                             <option value="Captain">Kapitän</option>
-                                            <option value="Admin">Admin</option>
+                                            <option value="Admin">Trainer</option>
                                         </select>
                                     </div>
                                 </div>
+                                {newPlayer.role !== 'Admin' && (
+                                    <div className="p-6 bg-brand/5 rounded-[2rem] border border-brand/10 space-y-6">
+                                        <h3 className="text-sm font-black uppercase tracking-widest text-brand flex items-center justify-between px-2">
+                                            FIFA Stats
+                                            <span className="text-2xl">{newPlayer.fifaStats.rating} OVR</span>
+                                        </h3>
 
-                                <div className="p-6 bg-brand/5 rounded-[2rem] border border-brand/10 space-y-6">
-                                    <h3 className="text-sm font-black uppercase tracking-widest text-brand flex items-center justify-between px-2">
-                                        FIFA Stats
-                                        <span className="text-2xl">{newPlayer.fifaStats.rating} OVR</span>
-                                    </h3>
-
-                                    <div className="grid grid-cols-3 gap-4">
-                                        {[
-                                            { label: "PAC", key: "pac" },
-                                            { label: "SHO", key: "sho" },
-                                            { label: "PAS", key: "pas" },
-                                            { label: "DRI", key: "dri" },
-                                            { label: "DEF", key: "def" },
-                                            { label: "PHY", key: "phy" },
-                                        ].map((s) => (
-                                            <div key={s.key} className="space-y-1">
-                                                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-1">{s.label}</label>
-                                                <input
-                                                    type="number"
-                                                    min="1"
-                                                    max="99"
-                                                    value={newPlayer.fifaStats[s.key as keyof typeof newPlayer.fifaStats]}
-                                                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                                                        const newVal = parseInt(e.target.value) || 0;
-                                                        const newFifaStats = { ...newPlayer.fifaStats, [s.key]: newVal };
-                                                        const sum = newFifaStats.pac + newFifaStats.sho + newFifaStats.pas + newFifaStats.dri + newFifaStats.def + newFifaStats.phy;
-                                                        newFifaStats.rating = Math.round(sum / 6);
-                                                        setNewPlayer({ ...newPlayer, fifaStats: newFifaStats });
-                                                    }}
-                                                    className="w-full bg-white border border-slate-100 rounded-xl px-3 py-2 focus:outline-none focus:border-brand/30 transition-all text-xs font-black shadow-inner"
-                                                />
-                                            </div>
-                                        ))}
+                                        <div className="grid grid-cols-3 gap-4">
+                                            {[
+                                                { label: "PAC", key: "pac" },
+                                                { label: "SHO", key: "sho" },
+                                                { label: "PAS", key: "pas" },
+                                                { label: "DRI", key: "dri" },
+                                                { label: "DEF", key: "def" },
+                                                { label: "PHY", key: "phy" },
+                                            ].map((s) => (
+                                                <div key={s.key} className="space-y-1">
+                                                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-1">{s.label}</label>
+                                                    <input
+                                                        type="number"
+                                                        min="1"
+                                                        max="99"
+                                                        value={newPlayer.fifaStats[s.key as keyof typeof newPlayer.fifaStats]}
+                                                        onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                                                            const newVal = parseInt(e.target.value) || 0;
+                                                            const newFifaStats = { ...newPlayer.fifaStats, [s.key]: newVal };
+                                                            const sum = newFifaStats.pac + newFifaStats.sho + newFifaStats.pas + newFifaStats.dri + newFifaStats.def + newFifaStats.phy;
+                                                            newFifaStats.rating = Math.round(sum / 6);
+                                                            setNewPlayer({ ...newPlayer, fifaStats: newFifaStats });
+                                                        }}
+                                                        className="w-full bg-white border border-slate-100 rounded-xl px-3 py-2 focus:outline-none focus:border-brand/30 transition-all text-xs font-black shadow-inner"
+                                                    />
+                                                </div>
+                                            ))}
+                                        </div>
                                     </div>
-                                </div>
+                                )}
 
                                 <div className="flex gap-4 pt-8">
                                     <button

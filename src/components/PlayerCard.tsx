@@ -103,7 +103,7 @@ export const PlayerCard: React.FC<PlayerCardProps> = ({ player, className }) => 
                         {player.role === 'Admin' && (
                             <div className="absolute top-6 right-6 z-30 transform rotate-12">
                                 <div className="bg-brand text-white text-[10px] font-black px-2 py-0.5 rounded shadow-lg border border-white/20">
-                                    ADMIN
+                                    TRAINER
                                 </div>
                             </div>
                         )}
@@ -157,46 +157,54 @@ export const PlayerCard: React.FC<PlayerCardProps> = ({ player, className }) => 
                         <div className={cn("h-[1px] w-4/5 mx-auto my-1.5 opacity-20", player.role === 'Admin' ? 'bg-brand' : (theme.text.includes("white") ? "bg-white" : "bg-black"))} />
 
 
-                        {/* Stats Grid */}
-                        <div className={cn(
-                            "grid grid-cols-2 gap-x-4 gap-y-0.5 px-3 text-[10px] font-black mb-2",
-                            theme.text
-                        )}>
-                            <div className="flex flex-col items-start gap-0.5">
-                                <div className="flex justify-between w-full">
-                                    <span className="opacity-60">PAC</span>
-                                    <span>{stats.pac}</span>
+                        {/* Stats Grid - Hidden for Admins */}
+                        {player.role !== 'Admin' ? (
+                            <div className={cn(
+                                "grid grid-cols-2 gap-x-4 gap-y-0.5 px-3 text-[10px] font-black mb-2",
+                                theme.text
+                            )}>
+                                <div className="flex flex-col items-start gap-0.5">
+                                    <div className="flex justify-between w-full">
+                                        <span className="opacity-60">PAC</span>
+                                        <span>{stats.pac}</span>
+                                    </div>
+                                    <div className="flex justify-between w-full">
+                                        <span className="opacity-60">SHO</span>
+                                        <span>{stats.sho}</span>
+                                    </div>
+                                    <div className="flex justify-between w-full">
+                                        <span className="opacity-60">PAS</span>
+                                        <span>{stats.pas}</span>
+                                    </div>
                                 </div>
-                                <div className="flex justify-between w-full">
-                                    <span className="opacity-60">SHO</span>
-                                    <span>{stats.sho}</span>
-                                </div>
-                                <div className="flex justify-between w-full">
-                                    <span className="opacity-60">PAS</span>
-                                    <span>{stats.pas}</span>
+                                <div className="flex flex-col items-start gap-0.5 border-l border-current/10 pl-3">
+                                    <div className="flex justify-between w-full">
+                                        <span className="opacity-60">DRI</span>
+                                        <span>{stats.dri}</span>
+                                    </div>
+                                    <div className="flex justify-between w-full">
+                                        <span className="opacity-60">DEF</span>
+                                        <span>{stats.def}</span>
+                                    </div>
+                                    <div className="flex justify-between w-full">
+                                        <span className="opacity-60">PHY</span>
+                                        <span>{stats.phy}</span>
+                                    </div>
                                 </div>
                             </div>
-                            <div className="flex flex-col items-start gap-0.5 border-l border-current/10 pl-3">
-                                <div className="flex justify-between w-full">
-                                    <span className="opacity-60">DRI</span>
-                                    <span>{stats.dri}</span>
-                                </div>
-                                <div className="flex justify-between w-full">
-                                    <span className="opacity-60">DEF</span>
-                                    <span>{stats.def}</span>
-                                </div>
-                                <div className="flex justify-between w-full">
-                                    <span className="opacity-60">PHY</span>
-                                    <span>{stats.phy}</span>
-                                </div>
+                        ) : (
+                            <div className="h-12 flex items-center justify-center">
+                                <span className={cn("text-[10px] font-black uppercase tracking-widest opacity-40", theme.text)}>
+                                    Coach / Staff
+                                </span>
                             </div>
-                        </div>
+                        )}
 
                         {/* Bottom Section */}
                         <div className="mt-auto pb-6 flex flex-col items-center opacity-60">
                             <div className="flex items-center gap-2 mb-1">
                                 <span className={cn("text-[8px] font-black tracking-widest uppercase", theme.text)}>
-                                    {player.role === 'Admin' ? 'Admin' : 'E.R.S. Team'}
+                                    {player.role === 'Admin' ? 'Trainer' : 'E.R.S. Team'}
                                 </span>
                             </div>
                         </div>
