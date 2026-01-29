@@ -53,7 +53,7 @@ const settingSections: SettingSection[] = [
     },
     {
         title: "Benutzer & Rollen",
-        description: "Trainer, Spieler und Berechtigungen verwalten",
+        description: "Admins, Spieler und Berechtigungen verwalten",
         icon: Users,
     },
     {

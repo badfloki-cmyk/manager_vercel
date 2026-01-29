@@ -12,7 +12,7 @@ interface PlayerCardProps {
         lastName: string;
         number: number;
         position: string;
-        role?: 'Captain' | 'Regular' | 'Trainer';
+        role?: 'Captain' | 'Regular' | 'Admin';
         photoUrl?: string;
         fifaStats?: {
             pac: number;
@@ -39,11 +39,11 @@ export const PlayerCard: React.FC<PlayerCardProps> = ({ player, className }) => 
     };
 
     const getThemeColors = (rating: number) => {
-        if (rating >= 85 || player.role === 'Trainer') return {
-            bg: player.role === 'Trainer' ? "from-[#1a1a1a] via-[#2a2a2a] to-[#000000]" : "from-[#d4006d] via-[#a00052] to-[#1e1b4b]",
+        if (rating >= 85 || player.role === 'Admin') return {
+            bg: player.role === 'Admin' ? "from-[#1a1a1a] via-[#2a2a2a] to-[#000000]" : "from-[#d4006d] via-[#a00052] to-[#1e1b4b]",
             text: "text-white",
             accent: "bg-white/20",
-            border: player.role === 'Trainer' ? "bg-brand/60" : "bg-white/40"
+            border: player.role === 'Admin' ? "bg-brand/60" : "bg-white/40"
         };
         if (rating >= 75) return {
             bg: "from-[#1e1b4b] via-[#312e81] to-[#4338ca]",
@@ -100,10 +100,10 @@ export const PlayerCard: React.FC<PlayerCardProps> = ({ player, className }) => 
                                 </div>
                             </div>
                         )}
-                        {player.role === 'Trainer' && (
+                        {player.role === 'Admin' && (
                             <div className="absolute top-6 right-6 z-30 transform rotate-12">
                                 <div className="bg-brand text-white text-[10px] font-black px-2 py-0.5 rounded shadow-lg border border-white/20">
-                                    STAFF
+                                    ADMIN
                                 </div>
                             </div>
                         )}
@@ -154,7 +154,7 @@ export const PlayerCard: React.FC<PlayerCardProps> = ({ player, className }) => 
                         </div>
 
                         {/* Divider */}
-                        <div className={cn("h-[1px] w-4/5 mx-auto my-1.5 opacity-20", player.role === 'Trainer' ? 'bg-brand' : (theme.text.includes("white") ? "bg-white" : "bg-black"))} />
+                        <div className={cn("h-[1px] w-4/5 mx-auto my-1.5 opacity-20", player.role === 'Admin' ? 'bg-brand' : (theme.text.includes("white") ? "bg-white" : "bg-black"))} />
 
 
                         {/* Stats Grid */}
@@ -196,7 +196,7 @@ export const PlayerCard: React.FC<PlayerCardProps> = ({ player, className }) => 
                         <div className="mt-auto pb-6 flex flex-col items-center opacity-60">
                             <div className="flex items-center gap-2 mb-1">
                                 <span className={cn("text-[8px] font-black tracking-widest uppercase", theme.text)}>
-                                    {player.role === 'Trainer' ? 'Management' : 'E.R.S. Team'}
+                                    {player.role === 'Admin' ? 'Admin' : 'E.R.S. Team'}
                                 </span>
                             </div>
                         </div>

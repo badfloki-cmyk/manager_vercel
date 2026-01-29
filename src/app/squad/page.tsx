@@ -365,16 +365,16 @@ export default function SquadPage() {
                 ) : (
                     <>
                         {/* Management Section */}
-                        {players.filter((p: Player) => !p.onBench && p.role === 'Trainer').length > 0 && (
+                        {players.filter((p: Player) => !p.onBench && p.role === 'Admin').length > 0 && (
                             <div className="mb-16">
                                 <h2 className="text-lg font-black mb-6 flex items-center gap-3 text-brand uppercase tracking-widest">
                                     <Users className="w-5 h-5" />
-                                    Management & Coaching
+                                    Admins & Coaching
                                 </h2>
                                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                                     <AnimatePresence mode="popLayout">
                                         {players
-                                            .filter((p: Player) => !p.onBench && p.role === 'Trainer')
+                                            .filter((p: Player) => !p.onBench && p.role === 'Admin')
                                             .map((player: Player) => (
                                                 <SquadPlayerCard key={player._id} player={player} />
                                             ))}
@@ -393,7 +393,7 @@ export default function SquadPage() {
                                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                                     <AnimatePresence mode="popLayout">
                                         {players
-                                            .filter((p: Player) => !p.onBench && p.team === teamName && p.role !== 'Trainer')
+                                            .filter((p: Player) => !p.onBench && p.team === teamName && p.role !== 'Admin')
                                             .sort((a: Player, b: Player) => {
                                                 if (a.role === 'Captain' && b.role !== 'Captain') return -1;
                                                 if (a.role !== 'Captain' && b.role === 'Captain') return 1;
@@ -560,12 +560,12 @@ export default function SquadPage() {
                                         <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-1">Rolle</label>
                                         <select
                                             value={newPlayer.role}
-                                            onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setNewPlayer({ ...newPlayer, role: e.target.value as 'Captain' | 'Regular' | 'Trainer' })}
+                                            onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setNewPlayer({ ...newPlayer, role: e.target.value as 'Captain' | 'Regular' | 'Admin' })}
                                             className="w-full bg-slate-50 border border-slate-100 rounded-2xl px-5 py-3.5 focus:outline-none focus:border-brand/30 focus:bg-white transition-all text-sm font-medium shadow-inner appearance-none cursor-pointer"
                                         >
                                             <option value="Regular">Normal</option>
                                             <option value="Captain">Kapitän</option>
-                                            <option value="Trainer">Trainer / Staff</option>
+                                            <option value="Admin">Admin</option>
                                         </select>
                                     </div>
                                 </div>
