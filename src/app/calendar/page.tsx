@@ -24,10 +24,10 @@ import { getEvents, createEvent, updateEvent, deleteEvent, Event } from "@/lib/e
 
 export default function CalendarPage() {
     const { data: session } = useSession();
+    const [viewDate, setViewDate] = useState(new Date());
     const isAdmin = session?.user?.role === "admin";
     const [team, setTeam] = useState<"1. Mannschaft" | "2. Mannschaft" | "Both">("Both");
     const [viewMode, setViewMode] = useState<"list" | "month" | "year">("list");
-    const [viewDate, setViewDate] = useState(new Date());
     const [events, setEvents] = useState<Event[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [isModalOpen, setIsModalOpen] = useState(false);

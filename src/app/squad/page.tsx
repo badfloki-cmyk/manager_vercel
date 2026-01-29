@@ -26,6 +26,7 @@ import { getPlayers, createPlayer, deletePlayer, updatePlayer, Player } from "@/
 import { PlayerCard as FIFACard } from "@/components/PlayerCard";
 
 export default function SquadPage() {
+    const { data: session } = useSession();
     const [team, setTeam] = useState<"1. Mannschaft" | "2. Mannschaft">("1. Mannschaft");
     const [players, setPlayers] = useState<Player[]>([]);
     const [isLoading, setIsLoading] = useState(true);
