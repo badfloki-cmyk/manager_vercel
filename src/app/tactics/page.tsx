@@ -89,7 +89,8 @@ export default function TacticsPage() {
                 setAvailablePlayers(players || []);
                 const { tactics } = await getTactics();
                 setSavedTactics(tactics || []);
-                localStorage.setItem("lastSeen_tactics", new Date().toISOString());
+                const userEmail = session?.user?.email || '';
+                localStorage.setItem(`lastSeen_tactics${userEmail ? `_${userEmail}` : ''}`, new Date().toISOString());
             } catch (err) {
                 console.error("Init error:", err);
             }

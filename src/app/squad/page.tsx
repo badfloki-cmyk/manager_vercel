@@ -91,7 +91,8 @@ export default function SquadPage() {
 
     useEffect(() => {
         loadPlayers();
-        localStorage.setItem("lastSeen_squad", new Date().toISOString());
+        const userEmail = session?.user?.email || '';
+        localStorage.setItem(`lastSeen_squad${userEmail ? `_${userEmail}` : ''}`, new Date().toISOString());
     }, [loadPlayers]);
 
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -365,7 +366,7 @@ export default function SquadPage() {
                 ) : (
                     <>
                         {/* Management Section */}
-                        {players.filter((p: Player) => !p.onBench && p.role === 'Admin').length > 0 && (
+                        {players.filter((p: Player) => !p.onBench && (p.role === 'Admin' || p.role === 'Trainer')).length > 0 && (
                             <div className="mb-16">
                                 <h2 className="text-lg font-black mb-6 flex items-center gap-3 text-brand uppercase tracking-widest">
                                     <Users className="w-5 h-5" />
@@ -374,7 +375,7 @@ export default function SquadPage() {
                                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                                     <AnimatePresence mode="popLayout">
                                         {players
-                                            .filter((p: Player) => !p.onBench && p.role === 'Admin')
+                                            .filter((p: Player) => !p.onBench && (p.role === 'Admin' || p.role === 'Trainer'))
                                             .map((player: Player) => (
                                                 <SquadPlayerCard key={player._id} player={player} />
                                             ))}
@@ -393,7 +394,7 @@ export default function SquadPage() {
                                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                                     <AnimatePresence mode="popLayout">
                                         {players
-                                            .filter((p: Player) => !p.onBench && p.team === teamName && p.role !== 'Admin')
+                                            .filter((p: Player) => !p.onBench && p.team === teamName && p.role !== 'Admin' && p.role !== 'Trainer')
                                             .sort((a: Player, b: Player) => {
                                                 if (a.role === 'Captain' && b.role !== 'Captain') return -1;
                                                 if (a.role !== 'Captain' && b.role === 'Captain') return 1;

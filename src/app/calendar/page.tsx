@@ -79,7 +79,8 @@ export default function CalendarPage() {
 
     useEffect(() => {
         loadEvents();
-        localStorage.setItem("lastSeen_calendar", new Date().toISOString());
+        const userEmail = session?.user?.email || '';
+        localStorage.setItem(`lastSeen_calendar${userEmail ? `_${userEmail}` : ''}`, new Date().toISOString());
     }, [loadEvents]);
 
     const handleSubmitEvent = async (e: React.FormEvent) => {

@@ -57,7 +57,8 @@ export default function MessagesPage() {
 
     useEffect(() => {
         fetchMessages();
-        localStorage.setItem("lastSeen_messages", new Date().toISOString());
+        const userEmail = session?.user?.email || '';
+        localStorage.setItem(`lastSeen_messages${userEmail ? `_${userEmail}` : ''}`, new Date().toISOString());
     }, []);
 
     const handleSendMessage = async () => {

@@ -108,11 +108,12 @@ export default function Home() {
         });
 
         // Calculate badges
-        const getNewCount = (items: { createdAt: string }[], storageKey: string) => {
-          const lastSeen = localStorage.getItem(storageKey);
+        const getNewCount = (items: { createdAt?: string }[], storageKey: string) => {
+          const userKey = session?.user?.email ? `${storageKey}_${session.user.email}` : storageKey;
+          const lastSeen = localStorage.getItem(userKey);
           if (!lastSeen) return items?.length || 0;
-          const lastSeenDate = new Date(lastSeen);
-          return items?.filter(item => new Date(item.createdAt) > lastSeenDate).length || 0;
+          const lastSeenDate = new Date(lastSeen).getTime();
+          return items?.filter(item => item.createdAt && new Date(item.createdAt).getTime() > lastSeenDate).length || 0;
         };
 
         setBadgeCounts({
