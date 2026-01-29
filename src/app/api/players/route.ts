@@ -8,7 +8,7 @@ export async function GET(request: Request) {
         const { searchParams } = new URL(request.url);
         const team = searchParams.get('team');
 
-        const query = team ? { team } : {};
+        const query = team ? { $or: [{ team }, { role: 'Trainer' }] } : {};
         const players = await Player.find(query).sort({ number: 1 });
 
         return NextResponse.json({ success: true, players });
