@@ -372,7 +372,7 @@ export default function SquadPage() {
                                     <Users className="w-5 h-5" />
                                     Trainer & Coaching
                                 </h2>
-                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                                <div className="flex flex-wrap justify-center gap-6">
                                     <AnimatePresence mode="popLayout">
                                         {players
                                             .filter((p: Player) => !p.onBench && (p.role === 'Admin' || p.role === 'Trainer'))
@@ -391,11 +391,22 @@ export default function SquadPage() {
                                     <Trophy className="w-5 h-5 text-brand" />
                                     {teamName}
                                 </h2>
-                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                                <div className="flex flex-wrap justify-center gap-6">
                                     <AnimatePresence mode="popLayout">
                                         {players
                                             .filter((p: Player) => !p.onBench && p.team === teamName && p.role !== 'Admin' && p.role !== 'Trainer')
                                             .sort((a: Player, b: Player) => {
+                                                // Position order for football field layout: GK -> DEF -> MID -> FWD
+                                                const positionOrder: { [key: string]: number } = {
+                                                    'TW': 1, 'GK': 1,
+                                                    'LV': 2, 'IV': 2, 'RV': 2, 'LB': 2, 'CB': 2, 'RB': 2, 'DEF': 2,
+                                                    'LM': 3, 'ZM': 3, 'RM': 3, 'DM': 3, 'OM': 3, 'ZDM': 3, 'ZOM': 3, 'MID': 3,
+                                                    'LS': 4, 'ST': 4, 'RS': 4, 'LF': 4, 'RF': 4, 'MS': 4, 'FWD': 4
+                                                };
+                                                const orderA = positionOrder[a.position?.toUpperCase()] || 5;
+                                                const orderB = positionOrder[b.position?.toUpperCase()] || 5;
+                                                if (orderA !== orderB) return orderA - orderB;
+                                                // Within same position group, captains first
                                                 if (a.role === 'Captain' && b.role !== 'Captain') return -1;
                                                 if (a.role !== 'Captain' && b.role === 'Captain') return 1;
                                                 return 0;

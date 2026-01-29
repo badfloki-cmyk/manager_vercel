@@ -29,15 +29,24 @@ interface PlayerCardProps {
 
 export const PlayerCard: React.FC<PlayerCardProps> = ({ player, className }) => {
     const isTrainer = player.role === 'Admin' || player.role === 'Trainer';
-    const stats = player.fifaStats || {
-        pac: isTrainer ? 100 : 50,
-        sho: isTrainer ? 100 : 50,
-        pas: isTrainer ? 100 : 50,
-        dri: isTrainer ? 100 : 50,
-        def: isTrainer ? 100 : 50,
-        phy: isTrainer ? 100 : 50,
-        rating: isTrainer ? 100 : 50,
-    };
+    // For trainers, always use 100 stats. For others, use fifaStats or default to 50
+    const stats = isTrainer ? {
+        pac: 100,
+        sho: 100,
+        pas: 100,
+        dri: 100,
+        def: 100,
+        phy: 100,
+        rating: 100,
+    } : (player.fifaStats || {
+        pac: 50,
+        sho: 50,
+        pas: 50,
+        dri: 50,
+        def: 50,
+        phy: 50,
+        rating: 50,
+    });
 
     const getThemeColors = (rating: number) => {
         if (rating >= 85 || player.role === 'Admin') return {
