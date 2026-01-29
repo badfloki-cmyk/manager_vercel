@@ -107,8 +107,8 @@ export default function TacticsPage() {
             : (e as React.MouseEvent).clientY;
 
         return {
-            x: ((clientX - rect.left) / rect.width) * 100,
-            y: ((clientY - rect.top) / rect.height) * 100
+            x: ((clientX - rect.left) / rect.width) * 1000,
+            y: ((clientY - rect.top) / rect.height) * 1000
         };
     };
 
@@ -482,19 +482,19 @@ export default function TacticsPage() {
                         }}
                     >
                         {/* Static Markings (SVG for better control) */}
-                        <svg className="absolute inset-0 w-full h-full pointer-events-none opacity-30" viewBox="0 0 100 100" preserveAspectRatio="none">
-                            <line x1="0" y1="50" x2="100" y2="50" stroke="white" strokeWidth="0.5" />
-                            <circle cx="50" cy="50" r="10" fill="none" stroke="white" strokeWidth="0.5" />
-                            <circle cx="50" cy="50" r="0.8" fill="white" />
+                        <svg className="absolute inset-0 w-full h-full pointer-events-none opacity-30" viewBox="0 0 1000 1000" preserveAspectRatio="none">
+                            <line x1="0" y1="500" x2="1000" y2="500" stroke="white" strokeWidth="5" />
+                            <circle cx="500" cy="500" r="100" fill="none" stroke="white" strokeWidth="5" />
+                            <circle cx="500" cy="500" r="8" fill="white" />
                             {/* Penalty boxes */}
-                            <rect x="25" y="0" width="50" height="15" fill="none" stroke="white" strokeWidth="0.5" />
-                            <rect x="25" y="85" width="50" height="15" fill="none" stroke="white" strokeWidth="0.5" />
+                            <rect x="250" y="0" width="500" height="150" fill="none" stroke="white" strokeWidth="5" />
+                            <rect x="250" y="850" width="500" height="150" fill="none" stroke="white" strokeWidth="5" />
                         </svg>
 
                         {/* Drawing Layer */}
                         <svg
                             ref={svgRef}
-                            viewBox="0 0 100 100"
+                            viewBox="0 0 1000 1000"
                             preserveAspectRatio="none"
                             className={cn(
                                 "absolute inset-0 w-full h-full z-20 transition-all cursor-crosshair",
@@ -512,12 +512,11 @@ export default function TacticsPage() {
                             {notes.map(note => (
                                 <foreignObject
                                     key={note.id}
-                                    x={note.x}
-                                    y={note.y}
-                                    width="40"
-                                    height="20"
+                                    x={note.x - 200}
+                                    y={note.y - 60}
+                                    width="400"
+                                    height="120"
                                     className="overflow-visible"
-                                    style={{ transform: 'translate(-50%, -50%)' }}
                                 >
 
                                     <motion.div
@@ -529,8 +528,8 @@ export default function TacticsPage() {
                                         onDragEnd={(_, info) => {
                                             if (!svgRef.current) return;
                                             const rect = svgRef.current.getBoundingClientRect();
-                                            const x = ((info.point.x - rect.left) / rect.width) * 100;
-                                            const y = ((info.point.y - rect.top) / rect.height) * 100;
+                                            const x = ((info.point.x - rect.left) / rect.width) * 1000;
+                                            const y = ((info.point.y - rect.top) / rect.height) * 1000;
                                             setNotes(prev => prev.map(n =>
                                                 n.id === note.id ? { ...n, x, y } : n
                                             ));
