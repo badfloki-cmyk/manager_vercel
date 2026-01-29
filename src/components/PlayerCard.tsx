@@ -4,7 +4,7 @@ import React from "react";
 import Image from "next/image";
 import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
-import { Users, Ambulance, Armchair } from "lucide-react";
+import { Users, Ambulance, Armchair, Moon } from "lucide-react";
 
 interface PlayerCardProps {
     player: {
@@ -100,19 +100,17 @@ export const PlayerCard: React.FC<PlayerCardProps> = ({ player, className }) => 
                                 <Ambulance className="w-4 h-4" />
                             </div>
                         )}
+                        {player.status === 'Away' && (
+                            <div className="bg-blue-500 text-white p-1 rounded-full shadow-lg" title="Abwesend">
+                                <Moon className="w-4 h-4" />
+                            </div>
+                        )}
                         {player.onBench && (
                             <div className="bg-yellow-500 text-white p-1 rounded-full shadow-lg" title="Auf der Bank">
                                 <Armchair className="w-4 h-4" />
                             </div>
                         )}
                     </div>
-
-                    style={{ clipPath: shieldPath }}
-                    className={cn(
-                        "relative h-full w-full overflow-hidden bg-gradient-to-br",
-                        theme.bg
-                    )}
-                >
                     {/* Texture Overlay */}
                     <div className="absolute inset-0 opacity-[0.05] bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] pointer-events-none mix-blend-overlay" />
 
