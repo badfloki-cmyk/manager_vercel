@@ -887,7 +887,7 @@ export default function TacticsPage() {
                                     <div className="flex flex-col gap-3">
                                         <button
                                             disabled={isSaving || !tacticName}
-                                            onClick={handleSaveTactic}
+                                            onClick={() => handleSaveTactic()}
                                             className="w-full bg-brand hover:bg-brand-dark disabled:opacity-50 text-white py-4 rounded-2xl font-black uppercase text-xs tracking-widest transition-all flex items-center justify-center gap-2 shadow-xl shadow-brand/20 active:scale-95"
                                         >
                                             {isSaving ? "Speichert..." : (
