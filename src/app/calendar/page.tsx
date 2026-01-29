@@ -1,4 +1,6 @@
-import React, { useState, useEffect } from "react";
+"use client";
+
+import React, { useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
     Calendar as CalendarIcon,
@@ -14,7 +16,6 @@ import {
     ChevronRight,
     List
 } from "lucide-react";
-import { useCallback } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { cn } from "@/lib/utils";
@@ -59,14 +60,22 @@ export default function CalendarPage() {
     const loadEvents = useCallback(async () => {
         setIsLoading(true);
         try {
-            const { events: fetchedEvents } = await getEvents(team === "Both" ? undefined : team);
+            const currentYear = viewDate.getFullYear();
+            const startDate = `${currentYear}-01-01`;
+            const endDate = `${currentYear}-12-31`;
+
+            const { events: fetchedEvents } = await getEvents(
+                team === "Both" ? undefined : team,
+                startDate,
+                endDate
+            );
             setEvents(fetchedEvents || []);
         } catch (error) {
             console.error("Failed to load events:", error);
         } finally {
             setIsLoading(false);
         }
-    }, [team]);
+    }, [team, viewDate]);
 
     useEffect(() => {
         loadEvents();

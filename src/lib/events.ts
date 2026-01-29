@@ -17,8 +17,11 @@ export interface Event {
     }[];
 }
 
-export const getEvents = async (team?: string) => {
-    const response = await api.get(`/events${team ? `?team=${team}` : ''}`);
+export const getEvents = async (team?: string, startDate?: string, endDate?: string) => {
+    let url = `/events?team=${team || 'Both'}`;
+    if (startDate) url += `&startDate=${startDate}`;
+    if (endDate) url += `&endDate=${endDate}`;
+    const response = await api.get(url);
     return response.data;
 };
 
@@ -28,7 +31,7 @@ export const createEvent = async (data: Partial<Event>) => {
 };
 
 export const updateEvent = async (id: string, data: Partial<Event>) => {
-    const response = await api.patch(`/events/${id}`, data);
+    const response = await api.put(`/events/${id}`, data);
     return response.data;
 };
 

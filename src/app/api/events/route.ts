@@ -9,11 +9,20 @@ export async function GET(request: Request) {
         await connectDB();
         const { searchParams } = new URL(request.url);
         const team = searchParams.get('team');
+        const startDate = searchParams.get('startDate');
+        const endDate = searchParams.get('endDate');
 
         // Support matching both team specific and "Both"
-        let query = {};
+        let query: any = {};
         if (team) {
-            query = { team: { $in: [team, 'Both'] } };
+            query.team = { $in: [team, 'Both'] };
+        }
+
+        // Add date range filter if provided
+        if (startDate || endDate) {
+            query.date = {};
+            if (startDate) query.date.$gte = startDate;
+            if (endDate) query.date.$lte = endDate;
         }
 
         const events = await Event.find(query).sort({ date: 1 });
