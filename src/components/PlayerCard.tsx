@@ -91,7 +91,7 @@ export const PlayerCard: React.FC<PlayerCardProps> = ({ player, className }) => 
                 {/* Inner Content Card */}
                 <div
                     style={{ clipPath: shieldPath }}
-                    className={cn("relative w-full h-full bg-gradient-to-br flex flex-col items-center pt-6 pb-2", theme.bg)}
+                    className={cn("relative w-full h-full overflow-hidden bg-gradient-to-br", theme.bg)}
                 >
                     {/* Status Icons */}
                     <div className="absolute top-4 right-4 z-20 flex flex-col gap-1">
