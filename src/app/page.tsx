@@ -10,8 +10,10 @@ import {
   MessageSquare,
   Settings,
   Activity,
-  Trophy
+  Trophy,
+  LogOut
 } from "lucide-react";
+import { useSession, signOut } from "next-auth/react";
 import Link from "next/link";
 import Image from "next/image";
 import { cn } from "@/lib/utils";
@@ -81,11 +83,8 @@ const NotificationBadge = ({ count }: { count: number }) => {
   );
 };
 
-import { useSession, signOut } from "next-auth/react";
-import { LogOut } from "lucide-react";
-
 export default function Home() {
-  const { data: session } = useSession();
+  const { data: session, status } = useSession();
   const isAdmin = session?.user?.role === "admin";
 
   const [stats, setStats] = useState({ players: 0, events: 0 });
@@ -136,8 +135,9 @@ export default function Home() {
         console.error("Dashboard load error:", error);
       }
     };
+    if (status === "loading") return;
     loadDashboardData();
-  }, []);
+  }, [session, status]);
 
   // Filter features based on role
   const filteredFeatures = features.filter(f => {

@@ -59,7 +59,7 @@ export default function MessagesPage() {
         fetchMessages();
         const userEmail = session?.user?.email || '';
         localStorage.setItem(`lastSeen_messages${userEmail ? `_${userEmail}` : ''}`, new Date().toISOString());
-    }, []);
+    }, [session]);
 
     const handleSendMessage = async () => {
         if (!newMessage || isThinking) return;

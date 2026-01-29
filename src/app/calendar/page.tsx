@@ -81,7 +81,7 @@ export default function CalendarPage() {
         loadEvents();
         const userEmail = session?.user?.email || '';
         localStorage.setItem(`lastSeen_calendar${userEmail ? `_${userEmail}` : ''}`, new Date().toISOString());
-    }, [loadEvents]);
+    }, [loadEvents, session]);
 
     const handleSubmitEvent = async (e: React.FormEvent) => {
         e.preventDefault();

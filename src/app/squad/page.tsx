@@ -93,7 +93,7 @@ export default function SquadPage() {
         loadPlayers();
         const userEmail = session?.user?.email || '';
         localStorage.setItem(`lastSeen_squad${userEmail ? `_${userEmail}` : ''}`, new Date().toISOString());
-    }, [loadPlayers]);
+    }, [loadPlayers, session]);
 
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];

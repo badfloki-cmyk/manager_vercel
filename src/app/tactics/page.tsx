@@ -96,7 +96,7 @@ export default function TacticsPage() {
             }
         };
         init();
-    }, []);
+    }, [session]);
 
     // Drawing Handlers
     const getCoordinates = (e: React.MouseEvent | React.TouchEvent) => {
