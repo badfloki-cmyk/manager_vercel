@@ -101,8 +101,8 @@ export const PlayerCard: React.FC<PlayerCardProps> = ({ player, className }) => 
                     <div
                         className="relative w-full h-full"
                         style={{
-                            WebkitMaskImage: "linear-gradient(to bottom, black 75%, transparent 100%)",
-                            maskImage: "linear-gradient(to bottom, black 75%, transparent 100%)"
+                            WebkitMaskImage: "radial-gradient(ellipse at center, black 40%, transparent 95%)",
+                            maskImage: "radial-gradient(ellipse at center, black 40%, transparent 95%)"
                         }}
                     >
                         {player.photoUrl ? (
@@ -110,7 +110,7 @@ export const PlayerCard: React.FC<PlayerCardProps> = ({ player, className }) => 
                                 src={player.photoUrl}
                                 alt={player.lastName}
                                 fill
-                                className="object-cover object-top drop-shadow-[0_10px_10px_rgba(0,0,0,0.3)] contrast-110 saturate-110"
+                                className="object-cover object-top drop-shadow-[0_10px_10px_rgba(0,0,0,0.3)] contrast-[1.05] saturate-[1.1]"
                             />
                         ) : (
                             <div className="w-full h-full flex items-center justify-center opacity-20">
