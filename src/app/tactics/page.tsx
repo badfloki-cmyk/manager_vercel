@@ -484,7 +484,7 @@ export default function TacticsPage() {
                             ref={svgRef}
                             className={cn(
                                 "absolute inset-0 w-full h-full z-20 transition-all cursor-crosshair",
-                                !isDrawMode && "pointer-events-none cursor-default"
+                                !isDrawMode && !isNoteMode && "pointer-events-none cursor-default"
                             )}
                             onMouseDown={startDrawing}
                             onMouseMove={draw}
