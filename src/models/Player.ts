@@ -7,7 +7,7 @@ export interface IPlayer extends Document {
     position: string;
     team: '1. Mannschaft' | '2. Mannschaft';
     status: 'Active' | 'Injured' | 'Away';
-    role: 'Captain' | 'Regular';
+    role: 'Captain' | 'Regular' | 'Trainer';
     photoUrl?: string;
     onBench: boolean;
     stats: {
@@ -35,7 +35,7 @@ const PlayerSchema: Schema = new Schema(
         position: { type: String, required: true },
         team: { type: String, enum: ['1. Mannschaft', '2. Mannschaft'], required: true },
         status: { type: String, enum: ['Active', 'Injured', 'Away'], default: 'Active' },
-        role: { type: String, enum: ['Captain', 'Regular'], default: 'Regular' },
+        role: { type: String, enum: ['Captain', 'Regular', 'Trainer'], default: 'Regular' },
         photoUrl: { type: String },
         onBench: { type: Boolean, default: false },
         stats: {

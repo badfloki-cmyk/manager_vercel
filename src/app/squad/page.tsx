@@ -13,7 +13,8 @@ import {
     Armchair,
     ArrowUpFromLine,
     ArrowDownToLine,
-    Pencil
+    Pencil,
+    Trophy
 } from "lucide-react";
 import { useCallback, useRef } from "react";
 import React from "react";
@@ -42,7 +43,7 @@ export default function SquadPage() {
         number: string;
         position: string;
         status: 'Active' | 'Injured' | 'Away';
-        role: 'Captain' | 'Regular';
+        role: 'Captain' | 'Regular' | 'Trainer';
         photoUrl?: string;
         fifaStats: {
             pac: number;
@@ -227,7 +228,7 @@ export default function SquadPage() {
     const { data: session } = useSession();
     const isAdmin = session?.user?.role === "admin";
 
-    const filteredPlayers = players.filter(p =>
+    const filteredPlayers = players.filter((p: Player) =>
         `${p.firstName} ${p.lastName}`.toLowerCase().includes(searchTerm.toLowerCase()) ||
         p.position.toLowerCase().includes(searchTerm.toLowerCase())
     );
@@ -321,7 +322,7 @@ export default function SquadPage() {
                             type="text"
                             placeholder="Spieler suchen (Name, Position...)"
                             value={searchTerm}
-                            onChange={(e) => setSearchTerm(e.target.value)}
+                            onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchTerm(e.target.value)}
                             className="w-full bg-slate-50 border border-slate-100 rounded-2xl py-3 pl-12 pr-6 text-sm focus:outline-none focus:border-brand/30 focus:bg-white transition-all shadow-inner font-medium"
                         />
                     </div>
@@ -363,26 +364,48 @@ export default function SquadPage() {
                     </div>
                 ) : (
                     <>
-                        {/* Active Players */}
-                        <div className="mb-8">
-                            <h2 className="text-lg font-bold mb-4 flex items-center gap-2">
-                                <Users className="w-5 h-5 text-brand" />
-                                Aktive Spieler ({activePlayers.length})
-                            </h2>
-                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                                <AnimatePresence mode="popLayout">
-                                    {activePlayers.map((player: Player) => (
-                                        <SquadPlayerCard key={player._id} player={player} />
-                                    ))}
-                                </AnimatePresence>
-                            </div>
-                            {activePlayers.length === 0 && (
-                                <div className="py-12 text-center border-2 border-dashed border-slate-800 rounded-2xl">
-                                    <Users className="w-10 h-10 text-slate-700 mx-auto mb-3" />
-                                    <p className="text-slate-500">Keine aktiven Spieler.</p>
+                        {/* Management Section */}
+                        {players.filter((p: Player) => !p.onBench && p.role === 'Trainer').length > 0 && (
+                            <div className="mb-16">
+                                <h2 className="text-lg font-black mb-6 flex items-center gap-3 text-brand uppercase tracking-widest">
+                                    <Users className="w-5 h-5" />
+                                    Management & Coaching
+                                </h2>
+                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                                    <AnimatePresence mode="popLayout">
+                                        {players
+                                            .filter((p: Player) => !p.onBench && p.role === 'Trainer')
+                                            .map((player: Player) => (
+                                                <SquadPlayerCard key={player._id} player={player} />
+                                            ))}
+                                    </AnimatePresence>
                                 </div>
-                            )}
-                        </div>
+                            </div>
+                        )}
+
+                        {/* Team Sections */}
+                        {['1. Mannschaft', '2. Mannschaft'].map((teamName) => (
+                            <div key={teamName} className="mb-16">
+                                <h2 className="text-lg font-black mb-6 flex items-center gap-3 text-slate-800 uppercase tracking-widest">
+                                    <Trophy className="w-5 h-5 text-brand" />
+                                    {teamName}
+                                </h2>
+                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                                    <AnimatePresence mode="popLayout">
+                                        {players
+                                            .filter((p: Player) => !p.onBench && p.team === teamName && p.role !== 'Trainer')
+                                            .sort((a: Player, b: Player) => {
+                                                if (a.role === 'Captain' && b.role !== 'Captain') return -1;
+                                                if (a.role !== 'Captain' && b.role === 'Captain') return 1;
+                                                return 0;
+                                            })
+                                            .map((player: Player) => (
+                                                <SquadPlayerCard key={player._id} player={player} />
+                                            ))}
+                                    </AnimatePresence>
+                                </div>
+                            </div>
+                        ))}
 
                         {/* Bench Section */}
                         <div>
@@ -537,11 +560,12 @@ export default function SquadPage() {
                                         <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-1">Rolle</label>
                                         <select
                                             value={newPlayer.role}
-                                            onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setNewPlayer({ ...newPlayer, role: e.target.value as 'Captain' | 'Regular' })}
+                                            onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setNewPlayer({ ...newPlayer, role: e.target.value as 'Captain' | 'Regular' | 'Trainer' })}
                                             className="w-full bg-slate-50 border border-slate-100 rounded-2xl px-5 py-3.5 focus:outline-none focus:border-brand/30 focus:bg-white transition-all text-sm font-medium shadow-inner appearance-none cursor-pointer"
                                         >
                                             <option value="Regular">Normal</option>
                                             <option value="Captain">Kapitän</option>
+                                            <option value="Trainer">Trainer / Staff</option>
                                         </select>
                                     </div>
                                 </div>

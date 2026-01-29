@@ -12,7 +12,7 @@ interface PlayerCardProps {
         lastName: string;
         number: number;
         position: string;
-        photoUrl?: string;
+        role?: 'Captain' | 'Regular' | 'Trainer';
         fifaStats?: {
             pac: number;
             sho: number;
@@ -38,11 +38,11 @@ export const PlayerCard: React.FC<PlayerCardProps> = ({ player, className }) => 
     };
 
     const getThemeColors = (rating: number) => {
-        if (rating >= 85) return {
-            bg: "from-[#d4006d] via-[#a00052] to-[#1e1b4b]",
+        if (rating >= 85 || player.role === 'Trainer') return {
+            bg: player.role === 'Trainer' ? "from-[#1a1a1a] via-[#2a2a2a] to-[#000000]" : "from-[#d4006d] via-[#a00052] to-[#1e1b4b]",
             text: "text-white",
             accent: "bg-white/20",
-            border: "bg-white/40"
+            border: player.role === 'Trainer' ? "bg-brand/60" : "bg-white/40"
         };
         if (rating >= 75) return {
             bg: "from-[#1e1b4b] via-[#312e81] to-[#4338ca]",
@@ -91,6 +91,21 @@ export const PlayerCard: React.FC<PlayerCardProps> = ({ player, className }) => 
 
                     {/* Content Container */}
                     <div className="relative h-full flex flex-col pt-12 px-4 text-center">
+                        {/* Captain / Trainer Badge */}
+                        {player.role === 'Captain' && (
+                            <div className="absolute top-6 right-6 z-30 transform rotate-12">
+                                <div className="bg-yellow-400 text-black text-[10px] font-black px-2 py-0.5 rounded shadow-lg border border-black/10">
+                                    CAPTAIN
+                                </div>
+                            </div>
+                        )}
+                        {player.role === 'Trainer' && (
+                            <div className="absolute top-6 right-6 z-30 transform rotate-12">
+                                <div className="bg-brand text-white text-[10px] font-black px-2 py-0.5 rounded shadow-lg border border-white/20">
+                                    STAFF
+                                </div>
+                            </div>
+                        )}
 
                         {/* Header: Rating & Position */}
                         <div className={cn(
@@ -138,7 +153,8 @@ export const PlayerCard: React.FC<PlayerCardProps> = ({ player, className }) => 
                         </div>
 
                         {/* Divider */}
-                        <div className={cn("h-[1px] w-4/5 mx-auto my-1.5 opacity-20", theme.text.includes("white") ? "bg-white" : "bg-black")} />
+                        <div className={cn("h-[1px] w-4/5 mx-auto my-1.5 opacity-20", player.role === 'Trainer' ? 'bg-brand' : (theme.text.includes("white") ? "bg-white" : "bg-black"))} />
+
 
                         {/* Stats Grid */}
                         <div className={cn(
@@ -178,7 +194,9 @@ export const PlayerCard: React.FC<PlayerCardProps> = ({ player, className }) => 
                         {/* Bottom Section */}
                         <div className="mt-auto pb-6 flex flex-col items-center opacity-60">
                             <div className="flex items-center gap-2 mb-1">
-                                <span className={cn("text-[8px] font-black tracking-widest uppercase", theme.text)}>E.R.S. Team</span>
+                                <span className={cn("text-[8px] font-black tracking-widest uppercase", theme.text)}>
+                                    {player.role === 'Trainer' ? 'Management' : 'E.R.S. Team'}
+                                </span>
                             </div>
                         </div>
                     </div>

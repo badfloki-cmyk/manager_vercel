@@ -8,7 +8,7 @@ export interface Player {
     position: string;
     team: '1. Mannschaft' | '2. Mannschaft';
     status: 'Active' | 'Injured' | 'Away';
-    role: 'Captain' | 'Regular';
+    role: 'Captain' | 'Regular' | 'Trainer';
     photoUrl?: string;
     onBench: boolean;
     stats: {
